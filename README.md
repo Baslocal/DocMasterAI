@@ -12,7 +12,7 @@ DocMaster is a closed-source, air-gapped, self-hosted Document Intelligence Appl
 
 | Phase | Title | Status | Gate Passed |
 |-------|-------|--------|-------------|
-| **1** | OS Foundation & Environment Hardening | 🔲 Not Started | — |
+| **1** | OS Foundation & Environment Hardening | 🔶 In Progress | Scripts written — run on live Debian 12 / Ubuntu 24.04 target |
 | **2** | Database, Queue & Storage Layer | 🔲 Not Started | — |
 | **3** | OCR Pipeline | 🔲 Not Started | — |
 | **4** | Build Execution & Installer Architecture | 🔲 Not Started | — |

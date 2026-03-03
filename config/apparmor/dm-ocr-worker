@@ -1,0 +1,115 @@
+# DocMaster — AppArmor profile for dm-ocr-worker
+# The OCR worker sub-process that executes inside dm-flux.service.
+# Has the broadest file access of any DocMaster profile because it runs
+# Tesseract, PaddleOCR, Kraken, and ffmpeg on document files.
+#
+# IMPORTANT: This profile is the one most likely to need tuning as new
+# document types or OCR engines are added. When adding a new engine, add
+# its binary paths here before enabling enforcement.
+#
+# Install: cp dm-ocr-worker /etc/apparmor.d/dm-ocr-worker && apparmor_parser -r /etc/apparmor.d/dm-ocr-worker
+
+#include <tunables/global>
+
+profile dm-ocr-worker flags=(complain) {
+  #include <abstractions/base>
+  #include <abstractions/python>
+
+  # Start in complain mode — switch to enforce after validating with a real document
+  # To enforce: aa-enforce /etc/apparmor.d/dm-ocr-worker
+
+  # ── Networking: localhost only ──────────────────────────────────────────
+  # Only needs to talk to Ollama on 127.0.0.1:11434
+  network inet stream,
+
+  # ── Read/Write: tmp working directory ────────────────────────────────────
+  /opt/docmaster/tmp/                       rw,
+  /opt/docmaster/tmp/**                     rw,
+
+  # ── Read: model files (all OCR models + ONNX classifier) ─────────────────
+  /opt/docmaster/models/                    r,
+  /opt/docmaster/models/**                  r,
+
+  # ── Read: config and schemas ─────────────────────────────────────────────
+  /opt/docmaster/config/schemas/**          r,
+  /opt/docmaster/config/dm.env              r,
+
+  # ── Read: source ─────────────────────────────────────────────────────────
+  /opt/docmaster/flux/                      r,
+  /opt/docmaster/flux/**                    r,
+  /opt/docmaster/core/.venv/**              mr,
+
+  # ── Write: logs ──────────────────────────────────────────────────────────
+  /opt/docmaster/logs/                      rw,
+  /opt/docmaster/logs/dm-flux*.log          rw,
+
+  # ── Execute: Python ──────────────────────────────────────────────────────
+  /usr/bin/python3.12                       mrix,
+  /usr/lib/python3.12/**                    mr,
+  /usr/local/lib/python3.12/**              mr,
+
+  # ── Execute: Tesseract ───────────────────────────────────────────────────
+  /usr/bin/tesseract                        Cx -> tesseract_child,
+  /usr/share/tessdata/**                    r,
+
+  # ── Execute: pdftoppm (PDF rasterization) ────────────────────────────────
+  /usr/bin/pdftoppm                         Cx -> pdftoppm_child,
+  /usr/bin/pdfinfo                          ix,
+
+  # ── Execute: ffmpeg / imagemagick ────────────────────────────────────────
+  /usr/bin/ffmpeg                           ix,
+  /usr/bin/convert                          ix,
+  /usr/lib/x86_64-linux-gnu/**              mr,
+
+  # ── ONNX Runtime (classifier) ────────────────────────────────────────────
+  /opt/docmaster/core/.venv/lib/*/site-packages/onnxruntime/** mr,
+
+  # ── PaddleOCR / PaddlePaddle ─────────────────────────────────────────────
+  /opt/docmaster/core/.venv/lib/*/site-packages/paddle/**       mr,
+  /opt/docmaster/core/.venv/lib/*/site-packages/paddleocr/**    mr,
+  # PaddleOCR model cache — must be local, no internet
+  /opt/docmaster/models/paddleocr/**        r,
+  # Deny PaddleOCR cache home outside /opt/docmaster
+  deny /root/.paddleocr/**                  rw,
+  deny /home/**/.paddleocr/**               rw,
+
+  # ── Kraken ───────────────────────────────────────────────────────────────
+  /opt/docmaster/core/.venv/lib/*/site-packages/kraken/**       mr,
+  /opt/docmaster/models/kraken/**           r,
+
+  # ── System ───────────────────────────────────────────────────────────────
+  /etc/localtime                            r,
+  /dev/null                                 rw,
+  /dev/urandom                              r,
+  /dev/random                               r,
+  /tmp/                                     rw,
+  /proc/@{pid}/                             r,
+  /proc/@{pid}/status                       r,
+
+  # ── Child profiles ────────────────────────────────────────────────────────
+  profile tesseract_child {
+    #include <abstractions/base>
+    /usr/bin/tesseract                      mr,
+    /usr/share/tessdata/**                  r,
+    /opt/docmaster/tmp/**                   rw,
+    /dev/null                               rw,
+  }
+
+  profile pdftoppm_child {
+    #include <abstractions/base>
+    /usr/bin/pdftoppm                       mr,
+    /opt/docmaster/tmp/**                   rw,
+    /usr/lib/x86_64-linux-gnu/**            mr,
+    /dev/null                               rw,
+  }
+
+  # ── Deny ──────────────────────────────────────────────────────────────────
+  deny /home/**                             rw,
+  deny /root/**                             rw,
+  deny /etc/passwd                          w,
+  deny /etc/shadow                          rw,
+  deny /opt/docmaster/vault/**              rw,
+  deny /opt/docmaster/data/**              rw,
+  deny /opt/docmaster/queue/**             rw,
+  deny /opt/docmaster/config/jwt*          rw,
+}

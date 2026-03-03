@@ -1,0 +1,74 @@
+# DocMaster — AppArmor profile for dm-core.service
+# FastAPI / Uvicorn API server (port 8443)
+#
+# Principle: dm-core can read its own source tree and config, write to logs,
+# and communicate with localhost only. It cannot access the internet, /home,
+# or any path outside /opt/docmaster/.
+#
+# Install: cp dm-core /etc/apparmor.d/dm-core && apparmor_parser -r /etc/apparmor.d/dm-core
+
+#include <tunables/global>
+
+profile dm-core /opt/docmaster/core/.venv/bin/uvicorn {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/python>
+  #include <abstractions/ssl_certs>
+
+  # ── Networking: localhost only ──────────────────────────────────────────
+  network inet  stream,
+  network inet6 stream,
+  # Deny external internet access — only loopback
+  deny network inet  dgram,
+  deny network inet6 dgram,
+
+  # ── Read: Python venv and application source ────────────────────────────
+  /opt/docmaster/core/                      r,
+  /opt/docmaster/core/**                    r,
+  /opt/docmaster/core/.venv/**              mr,
+  /opt/docmaster/config/dm.env              r,
+  /opt/docmaster/config/schemas/**          r,
+
+  # ── Read: JWT keys ──────────────────────────────────────────────────────
+  /opt/docmaster/config/jwt_private.pem     r,
+  /opt/docmaster/config/jwt_public.pem      r,
+
+  # ── Write: logs ─────────────────────────────────────────────────────────
+  /opt/docmaster/logs/                      rw,
+  /opt/docmaster/logs/dm-core*.log          rw,
+
+  # ── Write: tmp (file upload staging) ────────────────────────────────────
+  /opt/docmaster/tmp/                       rw,
+  /opt/docmaster/tmp/**                     rw,
+
+  # ── Read: ingest drop (for direct API push path) ────────────────────────
+  /opt/docmaster/ingest/**                  r,
+
+  # ── Execute: Python interpreter ─────────────────────────────────────────
+  /usr/bin/python3.12                       mrix,
+  /usr/lib/python3.12/**                    mr,
+  /usr/local/lib/python3.12/**              mr,
+
+  # ── Proc: own process info ──────────────────────────────────────────────
+  @{PROC}/@{pid}/                           r,
+  @{PROC}/@{pid}/status                     r,
+  @{PROC}/@{pid}/mem                        r,
+  @{PROC}/sys/kernel/osrelease              r,
+
+  # ── System: minimal ─────────────────────────────────────────────────────
+  /etc/localtime                            r,
+  /etc/ssl/certs/                           r,
+  /etc/ssl/certs/**                         r,
+  /dev/null                                 rw,
+  /dev/urandom                              r,
+  /dev/random                               r,
+  /tmp/                                     rw,
+
+  # ── Deny: everything else ────────────────────────────────────────────────
+  deny /home/**                             rw,
+  deny /root/**                             rw,
+  deny /etc/passwd                          w,
+  deny /etc/shadow                          rw,
+  deny /opt/docmaster/vault/**              rw,
+  deny /opt/docmaster/data/**              rw,
+}

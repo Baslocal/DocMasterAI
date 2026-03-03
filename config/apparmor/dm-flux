@@ -1,0 +1,83 @@
+# DocMaster — AppArmor profile for dm-flux.service
+# File watcher + OCR pipeline queue consumer
+#
+# dm-flux has broader filesystem access than dm-core because it reads
+# from ingest/, writes to tmp/, and reads model files.
+# It still cannot access the internet or write outside /opt/docmaster/.
+#
+# Install: cp dm-flux /etc/apparmor.d/dm-flux && apparmor_parser -r /etc/apparmor.d/dm-flux
+
+#include <tunables/global>
+
+profile dm-flux /opt/docmaster/flux/worker.py {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/python>
+
+  # ── Networking: localhost only (Redis + PostgreSQL + Ollama) ─────────────
+  network inet  stream,
+  network inet6 stream,
+
+  # ── Read/Write: ingest (where documents arrive) ──────────────────────────
+  /opt/docmaster/ingest/                    rw,
+  /opt/docmaster/ingest/**                  rw,
+
+  # ── Read/Write: tmp (per-job working directories) ────────────────────────
+  /opt/docmaster/tmp/                       rw,
+  /opt/docmaster/tmp/**                     rw,
+
+  # ── Read: source and config ──────────────────────────────────────────────
+  /opt/docmaster/flux/                      r,
+  /opt/docmaster/flux/**                    r,
+  /opt/docmaster/core/.venv/**              mr,
+  /opt/docmaster/config/dm.env              r,
+  /opt/docmaster/config/schemas/**          r,
+
+  # ── Read: model files (PaddleOCR, Kraken, ONNX classifier) ──────────────
+  /opt/docmaster/models/                    r,
+  /opt/docmaster/models/**                  r,
+
+  # ── Write: vault (append-only document archive) ──────────────────────────
+  /opt/docmaster/vault/                     r,
+  /opt/docmaster/vault/*.pdf                rw,
+  /opt/docmaster/vault/*.tiff               rw,
+  /opt/docmaster/vault/*.png                rw,
+
+  # ── Write: logs ─────────────────────────────────────────────────────────
+  /opt/docmaster/logs/                      rw,
+  /opt/docmaster/logs/dm-flux*.log          rw,
+
+  # ── Execute: Python ─────────────────────────────────────────────────────
+  /usr/bin/python3.12                       mrix,
+  /usr/lib/python3.12/**                    mr,
+  /usr/local/lib/python3.12/**              mr,
+
+  # ── Execute: Tesseract ───────────────────────────────────────────────────
+  /usr/bin/tesseract                        ix,
+  /usr/share/tessdata/**                    r,
+  /usr/lib/x86_64-linux-gnu/libtesseract*   mr,
+
+  # ── Execute: pdftoppm, imagemagick, ffmpeg ──────────────────────────────
+  /usr/bin/pdftoppm                         ix,
+  /usr/bin/pdfinfo                          ix,
+  /usr/bin/convert                          ix,
+  /usr/bin/ffmpeg                           ix,
+
+  # ── System ───────────────────────────────────────────────────────────────
+  /etc/localtime                            r,
+  /dev/null                                 rw,
+  /dev/urandom                              r,
+  /dev/random                               r,
+  /tmp/                                     rw,
+  /proc/@{pid}/                             r,
+  /proc/@{pid}/status                       r,
+  /proc/sys/kernel/osrelease                r,
+
+  # ── Deny ─────────────────────────────────────────────────────────────────
+  deny /home/**                             rw,
+  deny /root/**                             rw,
+  deny /etc/passwd                          w,
+  deny /etc/shadow                          rw,
+  deny /opt/docmaster/data/**              rw,
+  deny /opt/docmaster/queue/**             rw,
+}

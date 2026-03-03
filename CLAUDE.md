@@ -141,7 +141,7 @@ All in `dm_core` schema unless noted:
 
 | Phase | Title | Status |
 |-------|-------|--------|
-| 1 | OS Foundation & Environment Hardening | 🔲 Not Started |
+| 1 | OS Foundation & Environment Hardening | 🔶 In Progress — scripts written, awaiting live target |
 | 2 | Database, Queue & Storage Layer | 🔲 Not Started |
 | 3 | OCR Pipeline | 🔲 Not Started |
 | 4 | Build Execution & Installer Architecture | 🔲 Not Started |
@@ -149,6 +149,22 @@ All in `dm_core` schema unless noted:
 | 6 | Go-Live & Operational Readiness | 🔲 Not Started |
 | 7 | UI Layer | 🔲 Not Started |
 | 8 | Appliance Packaging & Delivery | 🔲 Not Started |
+
+### Phase 1 Deliverables (in repo)
+| File | Purpose |
+|------|---------|
+| `scripts/dm-install.sh` | Full idempotent Phase 1 installer (Method C) |
+| `scripts/dm-phase1-validate.sh` | Phase 1 gate checker — run after install |
+| `scripts/dm-generate-manifest.sh` | Generates `vault/manifest.lock` |
+| `config/apparmor/dm-core` | AppArmor profile for API server |
+| `config/apparmor/dm-flux` | AppArmor profile for OCR queue worker |
+| `config/apparmor/dm-ocr-worker` | AppArmor profile for OCR sub-process (complain mode initially) |
+
+### Phase 1 — Known Blueprint vs Brief Discrepancies (Brief wins)
+| Item | Phase 1 Blueprint says | Master Brief says (USE THIS) |
+|------|----------------------|-------------------------------|
+| System user | `docmaster` | **`dmuser`** |
+| API port | `8080` | **`8443`** |
 
 ---
 
