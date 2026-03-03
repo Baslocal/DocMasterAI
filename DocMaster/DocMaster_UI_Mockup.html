@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocMaster — Document Intelligence Appliance</title>
+<style>
+:root {
+  --bg-dark: #1e293b;
+  --bg-darker: #0f172a;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-accent-soft: rgba(56,189,248,0.08);
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-light: #94a3b8;
+  --accent: #38bdf8;
+  --accent-hover: #0284c7;
+  --accent-dark: #0369a1;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+  --border: #e2e8f0;
+  --border-dark: #cbd5e1;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-full: 9999px;
+  --sidebar-w: 240px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.5;font-size:14px;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--bg-dark);color:#fff;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+.logo-mark{width:40px;height:40px;background:var(--accent);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:var(--bg-dark);flex-shrink:0;letter-spacing:-0.5px;}
+.logo-text{font-weight:700;font-size:16px;letter-spacing:-0.02em;}
+.logo-version{font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;}
+.nav-section{padding:12px 8px 4px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:1px 8px;border-radius:var(--r-md);color:rgba(255,255,255,0.65);cursor:pointer;transition:all 0.15s;font-size:13.5px;position:relative;}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.nav-item.active{background:var(--accent);color:var(--bg-dark);font-weight:600;}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);font-size:10px;font-weight:600;padding:1px 6px;border-radius:var(--r-full);}
+.nav-item.active .nav-badge{background:rgba(15,23,42,0.2);color:var(--bg-dark);}
+.sidebar-spacer{flex:1;}
+.sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);}
+.license-badge{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(16,185,129,0.12);border-radius:var(--r-md);border:1px solid rgba(16,185,129,0.2);}
+.license-dot{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0;box-shadow:0 0 6px var(--success);}
+.license-info{font-size:11px;color:rgba(255,255,255,0.65);}
+.license-info strong{display:block;color:#fff;font-size:12px;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── TOPBAR ── */
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:60px;flex-shrink:0;}
+.search-wrap{flex:1;max-width:420px;position:relative;}
+.search-wrap input{width:100%;padding:9px 14px 9px 38px;border:1px solid var(--border);border-radius:var(--r-md);font-size:13.5px;color:var(--text-primary);background:var(--bg-primary);transition:all 0.2s;}
+.search-wrap input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,0.12);background:#fff;}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-light);font-size:14px;}
+.topbar-pills{display:flex;gap:10px;margin-left:auto;}
+.topbar-pill{padding:6px 14px;background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--r-md);text-align:center;cursor:default;}
+.pill-label{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.4px;}
+.pill-val{font-size:16px;font-weight:700;color:var(--text-primary);line-height:1.2;}
+.pill-val.accent{color:var(--accent-dark);}
+.pill-val.warn{color:var(--warning);}
+.topbar-actions{display:flex;align-items:center;gap:8px;margin-left:8px;}
+.icon-btn{width:36px;height:36px;border-radius:var(--r-md);border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);font-size:16px;transition:all 0.15s;position:relative;}
+.icon-btn:hover{background:var(--bg-primary);color:var(--text-primary);}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--error);border:1.5px solid #fff;}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0369a1,#38bdf8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;cursor:pointer;}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:28px;}
+.page{display:none;}
+.page.active{display:block;}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
+.page-title{font-size:26px;font-weight:700;letter-spacing:-0.02em;line-height:1.2;}
+.page-sub{color:var(--text-secondary);font-size:13.5px;margin-top:4px;}
+.page-actions{display:flex;gap:10px;flex-shrink:0;}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 18px;border-radius:var(--r-md);font-size:13.5px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:7px;transition:all 0.15s;white-space:nowrap;}
+.btn:active{transform:scale(0.98);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-hover);}
+.btn-secondary{background:#fff;color:var(--text-primary);border:1px solid var(--border);}
+.btn-secondary:hover{background:var(--bg-primary);}
+.btn-danger{background:rgba(239,68,68,0.1);color:var(--error);border:1px solid rgba(239,68,68,0.2);}
+.btn-danger:hover{background:rgba(239,68,68,0.15);}
+.btn-sm{padding:6px 12px;font-size:12.5px;}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid transparent;}
+.btn-ghost:hover{background:var(--bg-primary);color:var(--text-primary);}
+
+/* ── CARDS ── */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow-xs);}
+.card-title{font-size:15px;font-weight:600;margin-bottom:16px;}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.kpi-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;display:flex;align-items:flex-start;gap:16px;box-shadow:var(--shadow-xs);}
+.kpi-icon{width:46px;height:46px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.kpi-icon.green{background:rgba(16,185,129,0.1);}
+.kpi-icon.teal{background:rgba(56,189,248,0.1);}
+.kpi-icon.orange{background:rgba(245,158,11,0.1);}
+.kpi-icon.red{background:rgba(239,68,68,0.1);}
+.kpi-icon.blue{background:rgba(59,130,246,0.1);}
+.kpi-val{font-size:30px;font-weight:700;line-height:1.1;letter-spacing:-0.03em;}
+.kpi-label{font-size:13px;color:var(--text-secondary);margin-top:2px;}
+.kpi-delta{font-size:11.5px;margin-top:6px;font-weight:500;}
+.kpi-delta.up{color:var(--success);}
+.kpi-delta.down{color:var(--error);}
+.kpi-delta.warn{color:var(--warning);}
+
+/* ── CHART AREA ── */
+.dashboard-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;margin-bottom:24px;}
+.chart-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;box-shadow:var(--shadow-xs);}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.chart-tabs{display:flex;gap:4px;background:var(--bg-primary);border-radius:var(--r-md);padding:3px;}
+.chart-tab{padding:5px 12px;border-radius:var(--r-sm);font-size:12px;cursor:pointer;color:var(--text-secondary);transition:all 0.15s;}
+.chart-tab.active{background:#fff;color:var(--text-primary);font-weight:500;box-shadow:var(--shadow-xs);}
+
+/* ── ACTIVITY FEED ── */
+.activity-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.activity-item:last-child{border-bottom:none;}
+.activity-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0;}
+.activity-dot.complete{background:var(--success);}
+.activity-dot.review{background:var(--warning);}
+.activity-dot.failed{background:var(--error);}
+.activity-dot.processing{background:var(--accent);}
+.activity-text{font-size:13px;flex:1;}
+.activity-time{font-size:11.5px;color:var(--text-light);flex-shrink:0;}
+
+/* ── FILTERS ── */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.filter-pill{padding:7px 14px;border-radius:var(--r-full);border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;transition:all 0.15s;white-space:nowrap;}
+.filter-pill:hover{border-color:var(--accent);}
+.filter-pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.filter-count{opacity:0.7;font-size:11px;margin-left:4px;}
+
+/* ── ACTION BAR ── */
+.action-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;}
+.action-bar .spacer{margin-left:auto;}
+
+/* ── TABLE ── */
+.table-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-xs);}
+.table-inner{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--bg-primary);border-bottom:1px solid var(--border);}
+th{padding:11px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;cursor:pointer;user-select:none;}
+th:hover{color:var(--text-primary);}
+tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;}
+tbody tr:hover{background:var(--bg-primary);}
+tbody tr:last-child{border-bottom:none;}
+td{padding:14px;font-size:13.5px;vertical-align:middle;}
+.status-pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;padding:3px 10px;border-radius:var(--r-full);}
+.status-pill .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.sp-complete{background:rgba(16,185,129,0.1);color:#059669;}
+.sp-complete .dot{background:var(--success);}
+.sp-review{background:rgba(245,158,11,0.1);color:#d97706;}
+.sp-review .dot{background:var(--warning);}
+.sp-processing{background:rgba(56,189,248,0.1);color:#0284c7;}
+.sp-processing .dot{background:var(--accent);}
+.sp-failed{background:rgba(239,68,68,0.1);color:#dc2626;}
+.sp-failed .dot{background:var(--error);}
+.sp-queued{background:rgba(148,163,184,0.15);color:#475569;}
+.sp-queued .dot{background:var(--text-light);}
+.type-badge{display:inline-block;padding:3px 9px;border-radius:var(--r-sm);font-size:11.5px;font-weight:500;}
+.tb-invoice{background:rgba(59,130,246,0.1);color:#2563eb;}
+.tb-deed{background:rgba(139,92,246,0.1);color:#7c3aed;}
+.tb-form{background:rgba(34,197,94,0.1);color:#16a34a;}
+.tb-handwritten{background:rgba(249,115,22,0.1);color:#ea580c;}
+.tb-contract{background:rgba(236,72,153,0.1);color:#db2777;}
+.tb-report{background:rgba(20,184,166,0.1);color:#0d9488;}
+.conf-cell{display:flex;align-items:center;gap:8px;}
+.conf-bar{width:70px;height:5px;background:var(--border);border-radius:var(--r-full);overflow:hidden;flex-shrink:0;}
+.conf-fill{height:100%;border-radius:var(--r-full);}
+.conf-fill.high{background:var(--success);}
+.conf-fill.med{background:var(--warning);}
+.conf-fill.low{background:var(--error);}
+.conf-text{font-size:12px;font-weight:500;color:var(--text-secondary);}
+.doc-name{font-weight:500;color:var(--text-primary);}
+.doc-sub{font-size:11.5px;color:var(--text-light);margin-top:1px;}
+.table-action{background:none;border:none;color:var(--text-light);cursor:pointer;padding:4px 6px;border-radius:var(--r-sm);font-size:15px;transition:all 0.15s;}
+.table-action:hover{background:var(--bg-primary);color:var(--text-primary);}
+.table-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg-primary);}
+.pagination{display:flex;gap:4px;}
+.page-btn{padding:5px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:#fff;cursor:pointer;font-size:12.5px;color:var(--text-secondary);transition:all 0.15s;}
+.page-btn:hover{background:var(--bg-primary);}
+.page-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* ── QUEUE PAGE ── */
+.queue-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.queue-stat{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 20px;display:flex;align-items:center;gap:14px;}
+.queue-stat-icon{font-size:22px;}
+.queue-stat-val{font-size:22px;font-weight:700;}
+.queue-stat-label{font-size:12px;color:var(--text-secondary);}
+.progress-bar-wrap{width:100%;height:6px;background:var(--border);border-radius:var(--r-full);overflow:hidden;}
+.progress-bar{height:100%;border-radius:var(--r-full);transition:width 0.5s ease;}
+.pb-blue{background:var(--info);}
+.pb-teal{background:var(--accent);}
+.pb-green{background:var(--success);}
+.priority-badge{display:inline-block;padding:2px 8px;border-radius:var(--r-full);font-size:11px;font-weight:600;}
+.prio-high{background:rgba(239,68,68,0.1);color:#dc2626;}
+.prio-normal{background:rgba(56,189,248,0.1);color:#0284c7;}
+.prio-low{background:rgba(148,163,184,0.15);color:#475569;}
+
+/* ── INTEGRATIONS ── */
+.integration-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.integration-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;box-shadow:var(--shadow-xs);}
+.int-header{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.int-logo{width:44px;height:44px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--bg-primary);flex-shrink:0;}
+.int-name{font-weight:600;font-size:15px;}
+.int-type{font-size:12px;color:var(--text-secondary);}
+.int-status{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;margin-bottom:14px;padding:7px 12px;border-radius:var(--r-md);}
+.int-connected{background:rgba(16,185,129,0.08);color:#059669;}
+.int-disconnected{background:rgba(239,68,68,0.08);color:#dc2626;}
+.int-warning{background:rgba(245,158,11,0.08);color:#d97706;}
+.int-field{margin-bottom:12px;}
+.int-field-label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;}
+.int-field-val{font-size:13px;font-family:monospace;background:var(--bg-primary);padding:7px 10px;border-radius:var(--r-sm);border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.copy-btn{font-size:12px;color:var(--accent);cursor:pointer;font-family:sans-serif;}
+.int-actions{display:flex;gap:8px;margin-top:16px;}
+
+/* ── HEALTH ── */
+.health-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px;}
+.health-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow-xs);display:flex;flex-direction:column;gap:14px;}
+.health-indicator{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;}
+.hi-green{background:rgba(16,185,129,0.1);color:var(--success);}
+.hi-orange{background:rgba(245,158,11,0.1);color:var(--warning);}
+.hi-blue{background:rgba(56,189,248,0.1);color:var(--accent);}
+.hi-red{background:rgba(239,68,68,0.1);color:var(--error);}
+.health-card-title{font-size:15px;font-weight:600;}
+.health-status{font-size:13px;font-weight:500;}
+.hs-green{color:var(--success);}
+.hs-orange{color:var(--warning);}
+.hs-blue{color:var(--accent);}
+.hs-red{color:var(--error);}
+.health-metrics{font-size:12.5px;color:var(--text-secondary);}
+.terminal{background:#0f172a;border-radius:var(--r-lg);padding:20px;font-family:'Menlo','Monaco','Cascadia Code',monospace;font-size:12px;line-height:1.7;color:#94a3b8;height:220px;overflow-y:auto;border:1px solid rgba(255,255,255,0.06);}
+.terminal-header{display:flex;align-items:center;gap:6px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.term-dot{width:10px;height:10px;border-radius:50%;}
+.t-red{background:#ef4444;}
+.t-yellow{background:#f59e0b;}
+.t-green{background:#10b981;}
+.term-title{color:rgba(255,255,255,0.3);font-size:11px;margin-left:6px;}
+.log-line{margin-bottom:2px;}
+.log-ts{color:#334155;}
+.log-info{color:#38bdf8;}
+.log-ok{color:#10b981;}
+.log-warn{color:#f59e0b;}
+.log-err{color:#ef4444;}
+
+/* ── SETTINGS ── */
+.settings-layout{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start;}
+.settings-nav{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:12px;box-shadow:var(--shadow-xs);position:sticky;top:0;}
+.settings-nav-section{font-size:10px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.6px;padding:8px 10px 4px;}
+.settings-nav-item{padding:9px 12px;border-radius:var(--r-md);cursor:pointer;font-size:13.5px;color:var(--text-primary);margin-bottom:2px;transition:all 0.15s;display:flex;align-items:center;gap:8px;}
+.settings-nav-item:hover{background:var(--bg-primary);}
+.settings-nav-item.active{background:var(--accent);color:#fff;font-weight:500;}
+.settings-panel{display:none;}
+.settings-panel.active{display:block;}
+.settings-section{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;margin-bottom:20px;box-shadow:var(--shadow-xs);}
+.settings-section-title{font-size:15px;font-weight:600;margin-bottom:4px;}
+.settings-section-sub{font-size:12.5px;color:var(--text-secondary);margin-bottom:20px;}
+.form-group{margin-bottom:20px;}
+.form-label{display:block;font-size:13.5px;font-weight:500;margin-bottom:6px;color:var(--text-primary);}
+.form-helper{font-size:11.5px;color:var(--text-secondary);margin-top:5px;}
+.form-input,.form-select,.form-textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-md);font-size:13.5px;color:var(--text-primary);font-family:inherit;background:#fff;transition:all 0.2s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,0.12);}
+.form-input.mono,.form-textarea.mono{font-family:'Menlo','Monaco',monospace;font-size:12.5px;background:var(--bg-primary);}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.form-row:last-child{border-bottom:none;}
+.form-row-info .form-label{margin-bottom:2px;}
+.toggle{position:relative;display:inline-block;width:42px;height:23px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-track{position:absolute;cursor:pointer;inset:0;background:var(--border-dark);transition:0.25s;border-radius:var(--r-full);}
+.toggle-track:before{position:absolute;content:"";height:17px;width:17px;left:3px;bottom:3px;background:#fff;transition:0.25s;border-radius:50%;}
+input:checked+.toggle-track{background:var(--accent);}
+input:checked+.toggle-track:before{transform:translateX(19px);}
+.slider-wrap{margin:6px 0 2px;}
+.range-slider{width:100%;height:5px;border-radius:var(--r-full);background:var(--border);outline:none;-webkit-appearance:none;}
+.range-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+.range-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:none;}
+.slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);margin-top:4px;}
+.slider-current{text-align:center;font-size:15px;font-weight:700;color:var(--accent);margin-top:2px;}
+.checkbox-group{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+.checkbox-item{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.checkbox-item input{width:16px;height:16px;cursor:pointer;accent-color:var(--accent);}
+.checkbox-item span{font-size:13.5px;}
+.settings-actions{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-xs);}
+.form-row-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:var(--r-full);font-size:11.5px;font-weight:500;}
+.tag-green{background:rgba(16,185,129,0.1);color:#059669;}
+.tag-blue{background:rgba(56,189,248,0.1);color:#0284c7;}
+.tag-orange{background:rgba(245,158,11,0.1);color:#d97706;}
+.tag-red{background:rgba(239,68,68,0.1);color:#dc2626;}
+.tag-gray{background:rgba(148,163,184,0.15);color:#475569;}
+
+/* ── USER TABLE (Security) ── */
+.user-table-wrap{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;margin-top:12px;}
+.user-row{display:grid;grid-template-columns:36px 1fr 100px 100px 80px;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;}
+.user-row:last-child{border-bottom:none;}
+.user-row.header{background:var(--bg-primary);font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.4px;}
+.user-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;}
+
+/* ── LICENSE PANEL ── */
+.update-track{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;margin-top:16px;}
+.update-stages{display:flex;align-items:center;gap:0;margin:20px 0;}
+.update-stage{flex:1;text-align:center;position:relative;}
+.update-stage:not(:last-child):after{content:'';position:absolute;top:18px;left:50%;width:100%;height:2px;background:var(--border);z-index:0;}
+.update-stage.done:not(:last-child):after{background:var(--success);}
+.stage-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;margin:0 auto 8px;position:relative;z-index:1;}
+.stage-circle.done{background:var(--success);color:#fff;}
+.stage-circle.active{background:var(--info);color:#fff;box-shadow:0 0 0 4px rgba(59,130,246,0.2);}
+.stage-circle.pending{background:var(--border);color:var(--text-light);}
+.stage-label{font-size:11.5px;font-weight:500;color:var(--text-secondary);}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(2px);}
+.modal-overlay.hidden{display:none;}
+.modal{background:#fff;border-radius:var(--r-xl);width:90%;max-width:940px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-md);}
+.modal-sm{max-width:520px;}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.modal-title{font-size:18px;font-weight:600;}
+.modal-subtitle{font-size:12.5px;color:var(--text-secondary);margin-top:3px;}
+.modal-close{cursor:pointer;color:var(--text-light);font-size:20px;width:30px;height:30px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.modal-close:hover{background:var(--bg-primary);color:var(--text-primary);}
+.modal-body{padding:24px;overflow-y:auto;flex:1;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;}
+.modal-split{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+
+/* ── DOCUMENT DETAIL ── */
+.doc-preview-box{background:var(--bg-primary);border:2px dashed var(--border-dark);border-radius:var(--r-lg);height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-light);gap:10px;}
+.doc-preview-icon{font-size:48px;}
+.doc-preview-label{font-size:13px;font-weight:500;}
+.doc-preview-sub{font-size:11.5px;}
+.doc-nav-bar{display:flex;gap:8px;justify-content:center;margin-top:12px;}
+.field-extraction{display:flex;flex-direction:column;gap:14px;}
+.field-item{display:flex;flex-direction:column;gap:6px;}
+.field-header{display:flex;justify-content:space-between;align-items:center;}
+.field-name{font-size:13px;font-weight:600;}
+.field-conf{font-size:11px;font-weight:700;padding:2px 8px;border-radius:var(--r-full);}
+.fc-high{background:rgba(16,185,129,0.1);color:#059669;}
+.fc-med{background:rgba(245,158,11,0.1);color:#d97706;}
+.fc-low{background:rgba(239,68,68,0.1);color:#dc2626;}
+.timeline{display:flex;gap:0;margin:20px 0;}
+.tl-step{flex:1;text-align:center;position:relative;}
+.tl-step:not(:last-child):after{content:'';position:absolute;top:13px;left:50%;width:100%;height:2px;background:var(--border);z-index:0;}
+.tl-step.done:not(:last-child):after{background:var(--success);}
+.tl-dot{width:26px;height:26px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:12px;position:relative;z-index:1;}
+.tl-dot.done{background:var(--success);color:#fff;}
+.tl-dot.active{background:var(--accent);color:#fff;}
+.tl-dot.pending{background:var(--border);color:var(--text-light);}
+.tl-label{font-size:10.5px;font-weight:500;color:var(--text-secondary);}
+.tl-time{font-size:10px;color:var(--text-light);}
+
+/* ── UPLOAD MODAL ── */
+.dropzone{border:2px dashed var(--border-dark);border-radius:var(--r-lg);padding:40px;text-align:center;background:var(--bg-primary);cursor:pointer;transition:all 0.2s;}
+.dropzone:hover,.dropzone.drag-over{border-color:var(--accent);background:rgba(56,189,248,0.04);}
+.dropzone-icon{font-size:40px;margin-bottom:12px;}
+.dropzone-text{font-size:15px;font-weight:500;margin-bottom:6px;}
+.dropzone-sub{font-size:12.5px;color:var(--text-secondary);}
+
+/* ── MISC ── */
+.hidden{display:none!important;}
+.divider{border:none;border-top:1px solid var(--border);margin:4px 0;}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:var(--r-full);font-size:11px;font-weight:600;}
+.section-label{font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.alert-banner{border-radius:var(--r-md);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:16px;}
+.alert-warn{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:#92400e;}
+.alert-info{background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.15);color:#1e40af;}
+.key-display{font-family:monospace;font-size:12px;background:var(--bg-primary);border:1px solid var(--border);padding:8px 12px;border-radius:var(--r-md);letter-spacing:0.05em;display:flex;justify-content:space-between;align-items:center;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══════════════════ SIDEBAR ══════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">DM</div>
+    <div>
+      <div class="logo-text">DocMaster</div>
+      <div class="logo-version">v2.4.1 — node-01</div>
+    </div>
+  </div>
+
+  <div class="nav-section">Main</div>
+  <div class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span> Dashboard</div>
+  <div class="nav-item" data-page="documents"><span class="nav-icon">📄</span> Documents <span class="nav-badge">1,847</span></div>
+  <div class="nav-item" data-page="queue"><span class="nav-icon">⏱</span> Queue <span class="nav-badge">8</span></div>
+
+  <div class="nav-section">System</div>
+  <div class="nav-item" data-page="integrations"><span class="nav-icon">🔗</span> Integrations</div>
+  <div class="nav-item" data-page="health"><span class="nav-icon">❤️</span> System Health</div>
+  <div class="nav-item" data-page="settings"><span class="nav-icon">⚙️</span> Settings</div>
+
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-footer">
+    <div class="license-badge">
+      <div class="license-dot"></div>
+      <div class="license-info">
+        <strong>Licensed</strong>
+        Expires Nov 30, 2026 · 347d
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search documents, jobs, or settings…" id="global-search">
+    </div>
+    <div class="topbar-pills">
+      <div class="topbar-pill"><div class="pill-label">Today</div><div class="pill-val accent">124</div></div>
+      <div class="topbar-pill"><div class="pill-label">Queued</div><div class="pill-val">8</div></div>
+      <div class="topbar-pill"><div class="pill-label">Review</div><div class="pill-val warn">23</div></div>
+      <div class="topbar-pill"><div class="pill-label">Avg Conf.</div><div class="pill-val">96.2%</div></div>
+    </div>
+    <div class="topbar-actions">
+      <div class="icon-btn" title="Notifications">🔔<span class="notif-dot"></span></div>
+      <div class="icon-btn" title="Help">❓</div>
+      <div class="avatar" title="Admin User">AU</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══════ DASHBOARD ══════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div><h1 class="page-title">Dashboard</h1><p class="page-sub">Tuesday, March 3, 2026 — docmaster-node-01</p></div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="showUploadModal()">📤 Upload Documents</button>
+          <button class="btn btn-primary">↻ Refresh</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon green">📁</div>
+          <div><div class="kpi-val">1,847</div><div class="kpi-label">Total Documents</div><div class="kpi-delta up">↑ +124 today</div></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon teal">⚡</div>
+          <div><div class="kpi-val">8</div><div class="kpi-label">Processing Queue</div><div class="kpi-delta up">2 active now</div></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon orange">⚠️</div>
+          <div><div class="kpi-val">23</div><div class="kpi-label">Needs Review</div><div class="kpi-delta warn">↑ +3 since yesterday</div></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon green">📈</div>
+          <div><div class="kpi-val">96.2%</div><div class="kpi-label">Avg. Confidence</div><div class="kpi-delta up">↑ +0.4% this week</div></div>
+        </div>
+      </div>
+
+      <!-- Chart + Activity -->
+      <div class="dashboard-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div style="font-size:15px;font-weight:600;">Processing Volume</div>
+              <div style="font-size:12px;color:var(--text-secondary);">Documents processed per day — last 7 days</div>
+            </div>
+            <div class="chart-tabs">
+              <div class="chart-tab active">7D</div>
+              <div class="chart-tab">30D</div>
+              <div class="chart-tab">90D</div>
+            </div>
+          </div>
+          <!-- SVG chart -->
+          <svg viewBox="0 0 560 160" style="width:100%;height:160px;">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- Grid lines -->
+            <line x1="0" y1="30" x2="560" y2="30" stroke="#e2e8f0" stroke-width="1"/>
+            <line x1="0" y1="70" x2="560" y2="70" stroke="#e2e8f0" stroke-width="1"/>
+            <line x1="0" y1="110" x2="560" y2="110" stroke="#e2e8f0" stroke-width="1"/>
+            <line x1="0" y1="150" x2="560" y2="150" stroke="#e2e8f0" stroke-width="1"/>
+            <!-- Y labels -->
+            <text x="0" y="32" fill="#94a3b8" font-size="10">150</text>
+            <text x="0" y="72" fill="#94a3b8" font-size="10">100</text>
+            <text x="0" y="112" fill="#94a3b8" font-size="10">50</text>
+            <text x="8" y="152" fill="#94a3b8" font-size="10">0</text>
+            <!-- Area fill -->
+            <path d="M30,90 L110,60 L190,75 L270,40 L350,55 L430,30 L510,50 L510,150 L30,150 Z" fill="url(#chartGrad)"/>
+            <!-- Line -->
+            <polyline points="30,90 110,60 190,75 270,40 350,55 430,30 510,50" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <!-- Dots -->
+            <circle cx="30" cy="90" r="4" fill="#38bdf8"/>
+            <circle cx="110" cy="60" r="4" fill="#38bdf8"/>
+            <circle cx="190" cy="75" r="4" fill="#38bdf8"/>
+            <circle cx="270" cy="40" r="4" fill="#38bdf8"/>
+            <circle cx="350" cy="55" r="4" fill="#38bdf8"/>
+            <circle cx="430" cy="30" r="4.5" fill="#38bdf8" stroke="#fff" stroke-width="2"/>
+            <circle cx="510" cy="50" r="4" fill="#38bdf8"/>
+            <!-- X labels -->
+            <text x="22" y="165" fill="#94a3b8" font-size="10">Feb 25</text>
+            <text x="100" y="165" fill="#94a3b8" font-size="10">Feb 26</text>
+            <text x="178" y="165" fill="#94a3b8" font-size="10">Feb 27</text>
+            <text x="258" y="165" fill="#94a3b8" font-size="10">Feb 28</text>
+            <text x="337" y="165" fill="#94a3b8" font-size="10">Mar 1</text>
+            <text x="417" y="165" fill="#94a3b8" font-size="10">Mar 2</text>
+            <text x="497" y="165" fill="#94a3b8" font-size="10">Today</text>
+          </svg>
+          <!-- Type breakdown -->
+          <div style="display:flex;gap:20px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#2563eb;">641</div><div style="font-size:11px;color:var(--text-secondary);">Invoices</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#7c3aed;">429</div><div style="font-size:11px;color:var(--text-secondary);">Deeds</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#16a34a;">518</div><div style="font-size:11px;color:var(--text-secondary);">Forms</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#ea580c;">183</div><div style="font-size:11px;color:var(--text-secondary);">Handwritten</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#db2777;">76</div><div style="font-size:11px;color:var(--text-secondary);">Other</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Recent Activity</div>
+          <div class="activity-item"><div class="activity-dot complete"></div><div class="activity-text"><strong>Invoice_VND_2024.pdf</strong> extracted successfully — 97.1%</div><div class="activity-time">2m ago</div></div>
+          <div class="activity-item"><div class="activity-dot review"></div><div class="activity-text"><strong>Deed_012_Handwritten.pdf</strong> flagged for review — 71.2%</div><div class="activity-time">8m ago</div></div>
+          <div class="activity-item"><div class="activity-dot complete"></div><div class="activity-text"><strong>Form_W9_Employee.pdf</strong> extracted successfully — 99.4%</div><div class="activity-time">14m ago</div></div>
+          <div class="activity-item"><div class="activity-dot processing"></div><div class="activity-text"><strong>Registry_Batch_031.pdf</strong> processing now…</div><div class="activity-time">live</div></div>
+          <div class="activity-item"><div class="activity-dot failed"></div><div class="activity-text"><strong>Scan_Corrupted_008.pdf</strong> OCR failed — retrying (1/3)</div><div class="activity-time">31m ago</div></div>
+          <div class="activity-item"><div class="activity-dot complete"></div><div class="activity-text"><strong>Contract_ServiceAgt.pdf</strong> extracted successfully — 95.8%</div><div class="activity-time">42m ago</div></div>
+        </div>
+      </div>
+
+      <!-- Secondary KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+        <div class="card"><div class="section-label">OCR Engine</div><div style="font-size:22px;font-weight:700;">Tesseract 5.x</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">340ms avg • GPU: Off • 98.1% uptime</div></div>
+        <div class="card"><div class="section-label">Storage</div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-size:22px;font-weight:700;">83%</div><span class="tag tag-orange">Warning</span></div><div class="progress-bar-wrap"><div class="progress-bar pb-teal" style="width:83%;background:var(--warning);"></div></div><div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">847 GB used · 170 GB free</div></div>
+        <div class="card"><div class="section-label">Failed Jobs (7d)</div><div style="font-size:22px;font-weight:700;color:var(--error);">14</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">11 retried OK · 3 permanently failed</div><button class="btn btn-sm btn-ghost" style="margin-top:8px;">View Failed →</button></div>
+      </div>
+    </div><!-- end dashboard -->
+
+
+    <!-- ══════ DOCUMENTS ══════ -->
+    <div class="page" id="page-documents">
+      <div class="page-header">
+        <div><h1 class="page-title">Documents</h1><p class="page-sub">1,847 total documents in the system</p></div>
+        <div class="page-actions">
+          <button class="btn btn-secondary">📥 Export</button>
+          <button class="btn btn-primary" onclick="showUploadModal()">📤 Upload</button>
+        </div>
+      </div>
+      <div class="filters">
+        <div class="filter-pill active" data-filter="all">All <span class="filter-count">1847</span></div>
+        <div class="filter-pill" data-filter="complete">Complete <span class="filter-count">1802</span></div>
+        <div class="filter-pill" data-filter="review">Needs Review <span class="filter-count">23</span></div>
+        <div class="filter-pill" data-filter="failed">Failed <span class="filter-count">14</span></div>
+        <div class="filter-pill" data-filter="processing">Processing <span class="filter-count">8</span></div>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+          <select class="form-select" style="width:auto;padding:7px 12px;font-size:13px;">
+            <option>All Types</option><option>Invoice</option><option>Deed</option><option>Form</option><option>Handwritten</option><option>Contract</option><option>Report</option>
+          </select>
+          <select class="form-select" style="width:auto;padding:7px 12px;font-size:13px;">
+            <option>Newest First</option><option>Oldest First</option><option>Confidence ↓</option><option>Name A–Z</option>
+          </select>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-secondary btn-sm">⚡ Bulk Actions</button>
+        <button class="btn btn-secondary btn-sm">🗑 Delete Selected</button>
+        <button class="btn btn-secondary btn-sm">↻ Re-process Selected</button>
+        <span class="spacer"></span>
+        <span style="font-size:12.5px;color:var(--text-secondary);">0 selected</span>
+      </div>
+      <div class="table-wrap">
+        <div class="table-inner">
+          <table>
+            <thead>
+              <tr>
+                <th><input type="checkbox" style="width:16px;height:16px;accent-color:var(--accent);"></th>
+                <th>Status ↕</th><th>Document Name ↕</th><th>Type</th><th>Confidence ↕</th><th>Date ↕</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="document-row" onclick="showDocModal()">
+                <td><input type="checkbox" onclick="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--accent);"></td>
+                <td><span class="status-pill sp-complete"><span class="dot"></span>Complete</span></td>
+                <td><div class="doc-name">Land_Registry_Deed_034.pdf</div><div class="doc-sub">Uploaded via SFTP · 1.2 MB</div></td>
+                <td><span class="type-badge tb-deed">Deed</span></td>
+                <td><div class="conf-cell"><div class="conf-bar"><div class="conf-fill high" style="width:94%"></div></div><span class="conf-text">94.2%</span></div></td>
+                <td style="color:var(--text-secondary);font-size:12.5px;">Mar 3, 2026<br>09:14 AM</td>
+                <td><button class="table-action" title="View">👁</button><button class="table-action" title="Export">⬇</button><button class="table-action" title="More">⋯</button></td>
+              </tr>
+              <tr class="document-row" onclick="showDocModal()">
+                <td><input type="checkbox" onclick="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--accent);"></td>
+                <td><span class="status-pill sp-review"><span class="dot"></span>Needs Review</span></td>
+                <td><div class="doc-name">Invoice_VEN_0182_Feb2026.pdf</div><div class="doc-sub">Manual upload · 843 KB</div></td>
+                <td><span class="type-badge tb-invoice">Invoice</span></td>
+                <td><div class="conf-cell"><div class="conf-bar"><div class="conf-fill med" style="width:71%"></div></div><span class="conf-text">71.3%</span></div></td>
+                <td style="color:var(--text-secondary);font-size:12.5px;">Mar 3, 2026<br>08:52 AM</td>
+                <td><button class="table-action" title="View">👁</button><button class="table-action" title="Export">⬇</button><button class="table-action" title="More">⋯</button></td>
+              </tr>
+              <tr class="document-row" onclick="showDocModal()">
+                <td><input type="checkbox" onclick="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--accent);"></td>
+                <td><span class="status-pill sp-complete"><span class="dot"></span>Complete</span></td>
+                <td><div class="doc-name">W9_EmployeeForm_JSmith.pdf</div><div class="doc-sub">API upload /dm/v1/ingest · 590 KB</div></td>
+                <td><span class="type-badge tb-form">Form</span></td>
+                <td><div class="conf-cell"><div class="conf-bar"><div class="conf-fill high" style="width:99%"></div></div><span class="conf-text">99.4%</span></div></td>
+                <td style="color:var(--text-secondary);font-size:12.5px;">Mar 2, 2026<br>04:31 PM</td>
+                <td><button class="table-action" title="View">👁</button><button class="table-action" title="Export">⬇</button><button class="table-action" title="More">⋯</button></td>
+              </tr>
+              <tr class="document-row" onclick="showDocModal()">
+                <td><input type="checkbox" onclick="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--accent);"></td>
+                <td><span class="status-pill sp-processing"><span class="dot"></span>Processing</span></td>
+                <td><div class="doc-name">Registry_Batch_031.pdf</div><div class="doc-sub">Batch upload · 4.7 MB · 12 pages</div></td>
+                <td><span class="type-badge tb-deed">Deed</span></td>
+                <td><div class="conf-cell"><div class="conf-bar"><div class="conf-fill high" style="width:0%;background:var(--border);"></div></div><span class="conf-text">—</span></div></td>
+                <td style="color:var(--text-secondary);font-size:12.5px;">Mar 3, 2026<br>09:18 AM</td>
+                <td><button class="table-action" title="View">👁</button><button class="table-action" title="Cancel">✕</button><button class="table-action" title="More">⋯</button></td>
+              </tr>
+              <tr class="document-row" onclick="showDocModal()">
+                <td><input type="checkbox" onclick="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--accent);"></td>
+                <td><span class="status-pill sp-failed"><span class="dot"></span>Failed</span></td>
+                <td><div class="doc-name">Scan_Corrupted_008.pdf</div><div class="doc-sub">Manual upload · corrupted header · retrying 1/3</div></td>
+                <td><span class="type-badge tb-form">Form</span></td>
+                <td><div class="conf-cell"><div class="conf-bar"></div><span class="conf-text" style="color:var(--error);">Failed</span></div></td>
+                <td style="color:var(--text-secondary);font-size:12.5px;">Mar 2, 2026<br>11:05 AM</td>
+                <td><button class="table-action" title="Retry">↻</button><button class="table-action" title="Export">⬇</button><button class="table-action" title="More">⋯</button></td>
+              </tr>
+              <tr class="document-row" onclick="showDocModal()">
+                <td><input type="checkbox" onclick="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--accent);"></td>
+                <td><span class="status-pill sp-complete"><span class="dot"></span>Complete</span></td>
+                <td><div class="doc-name">Deed_Handwritten_Old_1987.pdf</div><div class="doc-sub">Uploaded via SFTP · 2.1 MB · scanned</div></td>
+                <td><span class="type-badge tb-handwritten">Handwritten</span></td>
+                <td><div class="conf-cell"><div class="conf-bar"><div class="conf-fill med" style="width:82%"></div></div><span class="conf-text">82.1%</span></div></td>
+                <td style="color:var(--text-secondary);font-size:12.5px;">Mar 2, 2026<br>09:00 AM</td>
+                <td><button class="table-action" title="View">👁</button><button class="table-action" title="Export">⬇</button><button class="table-action" title="More">⋯</button></td>
+              </tr>
+              <tr class="document-row" onclick="showDocModal()">
+                <td><input type="checkbox" onclick="event.stopPropagation()" style="width:15px;height:15px;accent-color:var(--accent);"></td>
+                <td><span class="status-pill sp-complete"><span class="dot"></span>Complete</span></td>
+                <td><div class="doc-name">ServiceAgreement_TechCorp.pdf</div><div class="doc-sub">API upload · 1.8 MB</div></td>
+                <td><span class="type-badge tb-contract">Contract</span></td>
+                <td><div class="conf-cell"><div class="conf-bar"><div class="conf-fill high" style="width:95%"></div></div><span class="conf-text">95.8%</span></div></td>
+                <td style="color:var(--text-secondary);font-size:12.5px;">Mar 1, 2026<br>03:44 PM</td>
+                <td><button class="table-action" title="View">👁</button><button class="table-action" title="Export">⬇</button><button class="table-action" title="More">⋯</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <div style="font-size:12.5px;color:var(--text-secondary);">Showing 1–25 of 1,847 documents</div>
+          <div class="pagination">
+            <button class="page-btn">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <span style="padding:5px 4px;font-size:12px;color:var(--text-light);">…</span>
+            <button class="page-btn">74</button>
+            <button class="page-btn">›</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- end documents -->
+
+
+    <!-- ══════ QUEUE ══════ -->
+    <div class="page" id="page-queue">
+      <div class="page-header">
+        <div><h1 class="page-title">Processing Queue</h1><p class="page-sub">Live view of all active and pending jobs</p></div>
+        <div class="page-actions">
+          <button class="btn btn-secondary">⏸ Pause Queue</button>
+          <button class="btn btn-secondary">🗑 Clear Completed</button>
+          <button class="btn btn-primary" onclick="showUploadModal()">📤 Add Job</button>
+        </div>
+      </div>
+
+      <div class="queue-stats">
+        <div class="queue-stat"><span class="queue-stat-icon">⚡</span><div><div class="queue-stat-val" style="color:var(--accent);">2</div><div class="queue-stat-label">Processing Now</div></div></div>
+        <div class="queue-stat"><span class="queue-stat-icon">⏳</span><div><div class="queue-stat-val">6</div><div class="queue-stat-label">Waiting in Queue</div></div></div>
+        <div class="queue-stat"><span class="queue-stat-icon">✅</span><div><div class="queue-stat-val" style="color:var(--success);">1,802</div><div class="queue-stat-label">Completed Today</div></div></div>
+        <div class="queue-stat"><span class="queue-stat-icon">⚙️</span><div><div class="queue-stat-val">~4.2s</div><div class="queue-stat-label">Avg. Processing Time</div></div></div>
+      </div>
+
+      <div class="alert-banner alert-info">
+        ℹ️ Queue is running normally. 2 workers active. GPU acceleration is <strong>disabled</strong>. Enable in <strong>Settings → OCR Engines</strong> to improve throughput.
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-inner">
+          <table>
+            <thead>
+              <tr>
+                <th>Job ID</th><th>Document</th><th>Priority</th><th>Stage</th><th>Progress</th><th>Est. Time</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-family:monospace;font-size:12px;color:var(--text-secondary);">#JOB-0912</td>
+                <td><div class="doc-name">Registry_Batch_031.pdf</div><div class="doc-sub">12 pages · Queued 2m ago</div></td>
+                <td><span class="priority-badge prio-high">High</span></td>
+                <td><span class="status-pill sp-processing"><span class="dot"></span>OCR</span></td>
+                <td style="width:160px;"><div class="progress-bar-wrap"><div class="progress-bar pb-blue" style="width:62%;animation:progress 3s ease-in-out infinite alternate;"></div></div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">62% — page 7 of 12</div></td>
+                <td style="font-size:12.5px;color:var(--text-secondary);">~18s</td>
+                <td><button class="table-action" title="Cancel">✕</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:12px;color:var(--text-secondary);">#JOB-0911</td>
+                <td><div class="doc-name">Invoice_Batch_Vendor09.pdf</div><div class="doc-sub">3 pages · Queued 4m ago</div></td>
+                <td><span class="priority-badge prio-normal">Normal</span></td>
+                <td><span class="status-pill sp-processing"><span class="dot"></span>Extracting</span></td>
+                <td style="width:160px;"><div class="progress-bar-wrap"><div class="progress-bar pb-teal" style="width:88%;"></div></div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">88% — field extraction</div></td>
+                <td style="font-size:12.5px;color:var(--text-secondary);">~5s</td>
+                <td><button class="table-action" title="Cancel">✕</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:12px;color:var(--text-secondary);">#JOB-0910</td>
+                <td><div class="doc-name">W9_NewEmployee_March.pdf</div><div class="doc-sub">1 page · Queued 6m ago</div></td>
+                <td><span class="priority-badge prio-normal">Normal</span></td>
+                <td><span class="status-pill sp-queued"><span class="dot"></span>Waiting</span></td>
+                <td style="width:160px;"><div class="progress-bar-wrap"></div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">In queue — position 1</div></td>
+                <td style="font-size:12.5px;color:var(--text-secondary);">~30s</td>
+                <td><button class="table-action" title="Promote">↑</button><button class="table-action" title="Cancel">✕</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:12px;color:var(--text-secondary);">#JOB-0909</td>
+                <td><div class="doc-name">Deed_Parcel_4421_East.pdf</div><div class="doc-sub">4 pages · Queued 8m ago</div></td>
+                <td><span class="priority-badge prio-low">Low</span></td>
+                <td><span class="status-pill sp-queued"><span class="dot"></span>Waiting</span></td>
+                <td style="width:160px;"><div class="progress-bar-wrap"></div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">In queue — position 2</div></td>
+                <td style="font-size:12.5px;color:var(--text-secondary);">~55s</td>
+                <td><button class="table-action" title="Promote">↑</button><button class="table-action" title="Cancel">✕</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:12px;color:var(--text-secondary);">#JOB-0907</td>
+                <td><div class="doc-name">Scan_Corrupted_008.pdf</div><div class="doc-sub">Retry 1 of 3 · Failed OCR</div></td>
+                <td><span class="priority-badge prio-high">High</span></td>
+                <td><span class="status-pill sp-failed"><span class="dot"></span>Retry</span></td>
+                <td style="width:160px;"><div class="progress-bar-wrap"><div class="progress-bar" style="width:15%;background:var(--error);"></div></div><div style="font-size:11px;color:var(--error);margin-top:4px;">Error: Corrupt PDF header</div></td>
+                <td style="font-size:12.5px;color:var(--text-secondary);">—</td>
+                <td><button class="table-action" title="Skip">✕</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- end queue -->
+
+
+    <!-- ══════ INTEGRATIONS ══════ -->
+    <div class="page" id="page-integrations">
+      <div class="page-header">
+        <div><h1 class="page-title">Integrations</h1><p class="page-sub">External connections and API endpoints</p></div>
+        <div class="page-actions"><button class="btn btn-primary">+ Add Integration</button></div>
+      </div>
+
+      <div class="integration-grid">
+        <!-- REST API -->
+        <div class="integration-card">
+          <div class="int-header"><div class="int-logo">🔌</div><div><div class="int-name">REST API</div><div class="int-type">HTTP/JSON · /dm/v1/</div></div></div>
+          <div class="int-status int-connected">● Connected &amp; Active</div>
+          <div class="int-field"><div class="int-field-label">Base Endpoint</div><div class="int-field-val"><span>https://node-01.docmaster.local/dm/v1/</span><span class="copy-btn">Copy</span></div></div>
+          <div class="int-field"><div class="int-field-label">API Key</div><div class="int-field-val"><span>dm_live_••••••••••••2a9f</span><span class="copy-btn">Reveal</span></div></div>
+          <div class="int-field"><div class="int-field-label">Rate Limit</div><div class="int-field-val"><span>120 req/min · 0 throttled today</span></div></div>
+          <div class="int-actions"><button class="btn btn-sm btn-secondary">Regenerate Key</button><button class="btn btn-sm btn-secondary">View Logs</button></div>
+        </div>
+
+        <!-- SFTP -->
+        <div class="integration-card">
+          <div class="int-header"><div class="int-logo">📁</div><div><div class="int-name">SFTP Watcher</div><div class="int-type">SSH File Transfer Protocol</div></div></div>
+          <div class="int-status int-connected">● Connected · Watching</div>
+          <div class="int-field"><div class="int-field-label">Host</div><div class="int-field-val"><span>sftp.registry.gov.gy:22</span><span class="copy-btn">Copy</span></div></div>
+          <div class="int-field"><div class="int-field-label">Watch Directory</div><div class="int-field-val"><span>/uploads/incoming/</span></div></div>
+          <div class="int-field"><div class="int-field-label">Poll Interval</div><div class="int-field-val"><span>30 seconds · Last check: 12s ago</span></div></div>
+          <div class="int-actions"><button class="btn btn-sm btn-secondary">Test Connection</button><button class="btn btn-sm btn-secondary">Configure</button></div>
+        </div>
+
+        <!-- Webhook -->
+        <div class="integration-card">
+          <div class="int-header"><div class="int-logo">🔔</div><div><div class="int-name">Webhook Output</div><div class="int-type">HTTP POST on completion</div></div></div>
+          <div class="int-status int-connected">● Active · 1,802 delivered</div>
+          <div class="int-field"><div class="int-field-label">Target URL</div><div class="int-field-val"><span>https://erm.registry.gov.gy/api/ingest</span><span class="copy-btn">Copy</span></div></div>
+          <div class="int-field"><div class="int-field-label">Secret Header</div><div class="int-field-val"><span>X-DM-Secret: ••••••••</span><span class="copy-btn">Reveal</span></div></div>
+          <div class="int-field"><div class="int-field-label">Events</div><div class="int-field-val"><span>extraction.complete · extraction.failed</span></div></div>
+          <div class="int-actions"><button class="btn btn-sm btn-secondary">Send Test</button><button class="btn btn-sm btn-secondary">Configure</button></div>
+        </div>
+
+        <!-- Email SMTP -->
+        <div class="integration-card">
+          <div class="int-header"><div class="int-logo">📧</div><div><div class="int-name">SMTP Email</div><div class="int-type">Alert delivery</div></div></div>
+          <div class="int-status int-connected">● Connected</div>
+          <div class="int-field"><div class="int-field-label">SMTP Host</div><div class="int-field-val"><span>smtp.mailrelay.gov.gy:587</span></div></div>
+          <div class="int-field"><div class="int-field-label">From Address</div><div class="int-field-val"><span>docmaster@registry.gov.gy</span></div></div>
+          <div class="int-field"><div class="int-field-label">Encryption</div><div class="int-field-val"><span>TLS/STARTTLS</span></div></div>
+          <div class="int-actions"><button class="btn btn-sm btn-secondary">Send Test Email</button><button class="btn btn-sm btn-secondary">Configure</button></div>
+        </div>
+
+        <!-- S3 -->
+        <div class="integration-card">
+          <div class="int-header"><div class="int-logo">☁️</div><div><div class="int-name">S3-Compatible Storage</div><div class="int-type">Document archive / backup</div></div></div>
+          <div class="int-status int-warning">⚠ Connected · Bucket 91% full</div>
+          <div class="int-field"><div class="int-field-label">Endpoint</div><div class="int-field-val"><span>s3.archive.internal:9000</span></div></div>
+          <div class="int-field"><div class="int-field-label">Bucket</div><div class="int-field-val"><span>docmaster-archive-prod</span></div></div>
+          <div class="int-field"><div class="int-field-label">Usage</div><div class="int-field-val"><span>455 GB / 500 GB</span></div></div>
+          <div class="int-actions"><button class="btn btn-sm btn-secondary">Manage Bucket</button><button class="btn btn-sm btn-secondary">Configure</button></div>
+        </div>
+
+        <!-- Active Directory -->
+        <div class="integration-card">
+          <div class="int-header"><div class="int-logo">🏢</div><div><div class="int-name">Active Directory</div><div class="int-type">LDAP / SSO Authentication</div></div></div>
+          <div class="int-status int-disconnected">✕ Disconnected</div>
+          <div class="int-field"><div class="int-field-label">LDAP Host</div><div class="int-field-val"><span>ldap://—not configured—</span></div></div>
+          <div class="int-field"><div class="int-field-label">Auth Mode</div><div class="int-field-val"><span>Local accounts (fallback)</span></div></div>
+          <div style="font-size:12.5px;color:var(--text-secondary);margin-top:8px;">Configure AD/LDAP to enable SSO and centralized user management.</div>
+          <div class="int-actions"><button class="btn btn-sm btn-primary">Configure AD</button></div>
+        </div>
+      </div>
+    </div><!-- end integrations -->
+
+
+    <!-- ══════ SYSTEM HEALTH ══════ -->
+    <div class="page" id="page-health">
+      <div class="page-header">
+        <div><h1 class="page-title">System Health</h1><p class="page-sub">Real-time service status and operational metrics</p></div>
+        <div class="page-actions">
+          <button class="btn btn-secondary">↻ Refresh</button>
+          <button class="btn btn-secondary">📊 Export Report</button>
+        </div>
+      </div>
+
+      <div class="alert-banner alert-warn">⚠️ <strong>Disk Warning:</strong> Primary storage at 83%. Consider archiving older documents or expanding volume.</div>
+
+      <div class="health-grid">
+        <div class="health-card">
+          <div class="health-indicator hi-green">✓</div>
+          <div>
+            <div class="health-card-title">OCR Engine (Tesseract)</div>
+            <div class="health-status hs-green">● Healthy — Running</div>
+            <div class="health-metrics">v5.3.4 · 340ms avg · 4 workers</div>
+            <div class="health-metrics">GPU: Disabled · CPU: 28%</div>
+          </div>
+          <button class="btn btn-sm btn-secondary" style="margin-top:auto;">Restart Service</button>
+        </div>
+        <div class="health-card">
+          <div class="health-indicator hi-green">✓</div>
+          <div>
+            <div class="health-card-title">Database (PostgreSQL)</div>
+            <div class="health-status hs-green">● Healthy — Running</div>
+            <div class="health-metrics">v15.4 · 8ms latency · 1,847 rows</div>
+            <div class="health-metrics">Connections: 4/100 · WAL: active</div>
+          </div>
+          <button class="btn btn-sm btn-secondary" style="margin-top:auto;">View DB Stats</button>
+        </div>
+        <div class="health-card">
+          <div class="health-indicator hi-green">✓</div>
+          <div>
+            <div class="health-card-title">AI Extraction Engine</div>
+            <div class="health-status hs-green">● Healthy — Model Loaded</div>
+            <div class="health-metrics">llama3.1:8b · 340ms inference</div>
+            <div class="health-metrics">Confidence avg: 96.2%</div>
+          </div>
+          <button class="btn btn-sm btn-secondary" style="margin-top:auto;">Swap Model</button>
+        </div>
+        <div class="health-card">
+          <div class="health-indicator hi-blue">⚡</div>
+          <div>
+            <div class="health-card-title">Processing Queue</div>
+            <div class="health-status hs-blue">● Active — 2 Processing</div>
+            <div class="health-metrics">8 jobs total · 6 waiting</div>
+            <div class="health-metrics">Throughput: ~14 docs/min</div>
+          </div>
+          <button class="btn btn-sm btn-secondary" style="margin-top:auto;">View Queue</button>
+        </div>
+        <div class="health-card">
+          <div class="health-indicator hi-orange">⚠️</div>
+          <div>
+            <div class="health-card-title">Disk Storage</div>
+            <div class="health-status hs-orange">⚠ Warning — 83% Used</div>
+            <div class="health-metrics">847 GB used · 170 GB free</div>
+            <div style="margin-top:10px;"><div class="progress-bar-wrap"><div class="progress-bar" style="width:83%;background:var(--warning);"></div></div></div>
+          </div>
+          <button class="btn btn-sm btn-danger" style="margin-top:auto;">Manage Storage</button>
+        </div>
+        <div class="health-card">
+          <div class="health-indicator hi-green">✓</div>
+          <div>
+            <div class="health-card-title">License Status</div>
+            <div class="health-status hs-green">● Valid — Enterprise</div>
+            <div class="health-metrics">Expires: Nov 30, 2026 (347 days)</div>
+            <div class="health-metrics">Seat limit: Unlimited</div>
+          </div>
+          <button class="btn btn-sm btn-secondary" style="margin-top:auto;">License Details</button>
+        </div>
+      </div>
+
+      <!-- Live Terminal -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow-xs);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:14px;font-weight:600;">Live System Logs</div>
+          <div style="display:flex;gap:8px;">
+            <select class="form-select" style="width:auto;padding:5px 10px;font-size:12px;"><option>All Services</option><option>OCR Engine</option><option>Extraction AI</option><option>Queue</option><option>API</option></select>
+            <button class="btn btn-sm btn-secondary">⏸ Pause</button>
+            <button class="btn btn-sm btn-secondary">📋 Copy</button>
+          </div>
+        </div>
+        <div class="terminal" id="terminal-log">
+          <div class="terminal-header"><span class="term-dot t-red"></span><span class="term-dot t-yellow"></span><span class="term-dot t-green"></span><span class="term-title">docmaster-node-01 — system log</span></div>
+          <div class="log-line"><span class="log-ts">[09:18:42] </span><span class="log-info">[QUEUE]  </span> Job #JOB-0912 started · Registry_Batch_031.pdf · 12 pages</div>
+          <div class="log-line"><span class="log-ts">[09:18:42] </span><span class="log-info">[OCR]    </span> tesseract-worker-1 assigned · DPI:300 · lang:eng+spa</div>
+          <div class="log-line"><span class="log-ts">[09:18:38] </span><span class="log-ok">[EXTRACT]</span> #JOB-0911 extraction complete · conf:88.4% · 14 fields</div>
+          <div class="log-line"><span class="log-ts">[09:18:35] </span><span class="log-ok">[API]    </span> POST /dm/v1/ingest · 200 OK · 142ms · client:sftp-watcher</div>
+          <div class="log-line"><span class="log-ts">[09:18:31] </span><span class="log-warn">[DISK]   </span> Storage threshold exceeded: 83.1% (threshold: 80%)</div>
+          <div class="log-line"><span class="log-ts">[09:18:28] </span><span class="log-ok">[QUEUE]  </span> Job #JOB-0908 complete · 4.1s · W9_Form_Staff01.pdf</div>
+          <div class="log-line"><span class="log-ts">[09:17:55] </span><span class="log-err">[OCR]    </span> Job #JOB-0907 failed · Scan_Corrupted_008.pdf · corrupt PDF header</div>
+          <div class="log-line"><span class="log-ts">[09:17:55] </span><span class="log-warn">[RETRY]  </span> Scheduling retry 1/3 for #JOB-0907 in 60s</div>
+          <div class="log-line"><span class="log-ts">[09:17:44] </span><span class="log-ok">[DB]     </span> Vacuum complete · 0 dead tuples · next: 2026-03-04 02:00</div>
+          <div class="log-line"><span class="log-ts">[09:17:30] </span><span class="log-info">[API]    </span> GET /dm/v1/health · 200 OK · 3ms · client:monitor</div>
+          <div class="log-line"><span class="log-ts">[09:16:58] </span><span class="log-ok">[WEBHOOK]</span> Delivery success · POST erm.registry.gov.gy · 201 · 198ms</div>
+          <div class="log-line"><span class="log-ts">[09:16:22] </span><span class="log-ok">[EXTRACT]</span> #JOB-0906 complete · Invoice_VND_2024.pdf · conf:97.1%</div>
+          <div id="log-cursor" class="log-line"><span class="log-ts">[09:18:43] </span><span class="log-info">[OCR]    </span> Processing page 8/12…<span id="blink">█</span></div>
+        </div>
+      </div>
+    </div><!-- end health -->
+
+
+    <!-- ══════ SETTINGS ══════ -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div><h1 class="page-title">Settings</h1><p class="page-sub">System-wide configuration and preferences</p></div>
+      </div>
+
+      <div class="settings-layout">
+        <!-- Settings Nav -->
+        <div class="settings-nav">
+          <div class="settings-nav-section">Configuration</div>
+          <div class="settings-nav-item active" data-panel="general">⚙️ General</div>
+          <div class="settings-nav-item" data-panel="ocr">🔬 OCR Engines</div>
+          <div class="settings-nav-item" data-panel="extraction">🤖 Extraction Models</div>
+          <div class="settings-nav-section">Connections</div>
+          <div class="settings-nav-item" data-panel="integrations-settings">🔗 Integrations</div>
+          <div class="settings-nav-item" data-panel="storage">💾 Storage &amp; Backup</div>
+          <div class="settings-nav-section">Administration</div>
+          <div class="settings-nav-item" data-panel="security">🔒 Security &amp; Access</div>
+          <div class="settings-nav-item" data-panel="license">🪪 License &amp; Updates</div>
+          <div class="settings-nav-item" data-panel="advanced">🛠 Advanced</div>
+        </div>
+
+        <!-- Settings Panels -->
+        <div>
+
+          <!-- GENERAL -->
+          <div class="settings-panel active" id="panel-general">
+            <div class="settings-section">
+              <div class="settings-section-title">System Identity</div>
+              <div class="settings-section-sub">Basic appliance identification and locale settings.</div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Appliance Name</label><input class="form-input" value="docmaster-node-01"><div class="form-helper">Visible in logs and network discovery</div></div>
+                <div class="form-group"><label class="form-label">Node ID</label><input class="form-input mono" value="DM-2024-NODE-01" readonly><div class="form-helper">Assigned at provisioning — read only</div></div>
+              </div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Timezone</label><select class="form-select"><option>UTC (Coordinated Universal Time)</option><option>America/New_York</option><option>America/Guyana</option><option>Europe/London</option><option>Asia/Singapore</option></select><div class="form-helper">All timestamps and logs use this timezone</div></div>
+                <div class="form-group"><label class="form-label">Display Language</label><select class="form-select"><option selected>English (US)</option><option>English (UK)</option><option>Spanish</option><option>French</option><option>Portuguese</option></select><div class="form-helper">UI language for all operators</div></div>
+              </div>
+              <div class="form-group"><label class="form-label">Admin Contact Email</label><input class="form-input" type="email" value="admin@registry.gov.gy"><div class="form-helper">Receives system alerts and license expiry notices</div></div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Processing Defaults</div>
+              <div class="settings-section-sub">Controls how jobs behave when submitted without explicit parameters.</div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Default Queue Priority</label><select class="form-select"><option>High</option><option selected>Normal</option><option>Low</option></select><div class="form-helper">Priority for manually uploaded documents</div></div>
+                <div class="form-group"><label class="form-label">Maximum Retry Attempts</label><input class="form-input" type="number" value="3" min="1" max="10"><div class="form-helper">Stop retrying after this many failures</div></div>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Auto-retry failed jobs</div><div class="form-helper">Automatically re-queue failed extractions up to max retries</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Pause queue on critical error</div><div class="form-helper">Halt all processing if a system-critical failure occurs</div></div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-group" style="margin-top:16px;">
+                <label class="form-label">Confidence threshold for human review</label>
+                <div class="slider-wrap"><input type="range" class="range-slider" id="conf-slider" min="0" max="100" value="85" oninput="document.getElementById('conf-val').textContent=this.value"></div>
+                <div class="slider-labels"><span>0%</span><span>50%</span><span>100%</span></div>
+                <div class="slider-current"><span id="conf-val">85</span>%</div>
+                <div class="form-helper">Documents with confidence below this score are flagged for human review before being marked complete</div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">UI Preferences</div>
+              <div class="settings-section-sub">Display and interface behavior settings.</div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Documents per page</label><select class="form-select"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></div>
+                <div class="form-group"><label class="form-label">Date format</label><select class="form-select"><option selected>YYYY-MM-DD</option><option>MM/DD/YYYY</option><option>DD/MM/YYYY</option><option>DD MMM YYYY</option></select></div>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Show confidence scores in table</div><div class="form-helper">Display confidence progress bars in the document list</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Enable real-time notifications</div><div class="form-helper">Show live alerts for completed and failed jobs</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Dark mode</div><div class="form-helper">Experimental — requires page reload</div></div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Email Notifications</div>
+              <div class="settings-section-sub">Configure when and what alerts are sent via SMTP.</div>
+              <div class="form-group"><label class="form-label">Admin email address</label><input class="form-input" type="email" value="admin@registry.gov.gy"><div class="form-helper">System alerts and daily digest are sent here</div></div>
+              <div class="form-group"><label class="form-label">Send email for:</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" checked><span>Notify on failed jobs</span></label>
+                  <label class="checkbox-item"><input type="checkbox" checked><span>Daily processing summary (6:00 AM)</span></label>
+                  <label class="checkbox-item"><input type="checkbox" checked><span>Low disk space alerts (&lt; 20% free)</span></label>
+                  <label class="checkbox-item"><input type="checkbox" checked><span>License expiry warnings (&lt; 30 days)</span></label>
+                  <label class="checkbox-item"><input type="checkbox"><span>New document ingested (high-volume environments: disable)</span></label>
+                  <label class="checkbox-item"><input type="checkbox"><span>Queue stalled or paused</span></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-actions">
+              <button class="btn btn-ghost">↺ Reset to Defaults</button>
+              <div style="display:flex;gap:10px;"><button class="btn btn-secondary">Cancel</button><button class="btn btn-primary">Save Changes</button></div>
+            </div>
+          </div><!-- /general -->
+
+          <!-- OCR ENGINES -->
+          <div class="settings-panel" id="panel-ocr">
+            <div class="settings-section">
+              <div class="settings-section-title">Active OCR Engine</div>
+              <div class="settings-section-sub">Select and configure the OCR backend used for text recognition.</div>
+              <div class="form-group"><label class="form-label">OCR Engine</label><select class="form-select"><option selected>Tesseract 5.x (Recommended)</option><option>EasyOCR</option><option>PaddleOCR</option><option>Azure Cognitive Services (Cloud)</option><option>Google Cloud Vision (Cloud)</option></select><div class="form-helper">Tesseract is the default on-premises engine. Cloud engines require API keys in Integrations.</div></div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Scan DPI</label><select class="form-select"><option>150</option><option>200</option><option selected>300</option><option>400</option><option>600</option></select><div class="form-helper">Higher DPI improves accuracy on small text</div></div>
+                <div class="form-group"><label class="form-label">OCR Workers</label><input class="form-input" type="number" value="4" min="1" max="32"><div class="form-helper">Parallel processing threads</div></div>
+              </div>
+              <div class="form-group"><label class="form-label">Language Packs (active)</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" checked><span>English (eng) — <em>default</em></span></label>
+                  <label class="checkbox-item"><input type="checkbox" checked><span>Spanish (spa)</span></label>
+                  <label class="checkbox-item"><input type="checkbox"><span>French (fra)</span></label>
+                  <label class="checkbox-item"><input type="checkbox"><span>Portuguese (por)</span></label>
+                  <label class="checkbox-item"><input type="checkbox"><span>Dutch (nld)</span></label>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">Performance &amp; Hardware</div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">GPU Acceleration (CUDA)</div><div class="form-helper">Requires NVIDIA GPU with CUDA 11+. Currently: No GPU detected.</div></div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Image pre-processing (deskew + denoise)</div><div class="form-helper">Improves accuracy on skewed or noisy scans at slight speed cost</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Auto-rotate page detection</div><div class="form-helper">Detect and correct page orientation automatically</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-group" style="margin-top:12px;">
+                <label class="form-label">Page segmentation mode</label>
+                <select class="form-select"><option>3 — Fully automatic (recommended)</option><option>1 — Auto with OSD</option><option>6 — Single uniform block</option><option>11 — Sparse text</option></select>
+                <div class="form-helper">Controls how Tesseract segments each page</div>
+              </div>
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-ghost">↺ Reset to Defaults</button>
+              <div style="display:flex;gap:10px;"><button class="btn btn-secondary">Cancel</button><button class="btn btn-primary">Save Changes</button></div>
+            </div>
+          </div><!-- /ocr -->
+
+          <!-- EXTRACTION MODELS -->
+          <div class="settings-panel" id="panel-extraction">
+            <div class="settings-section">
+              <div class="settings-section-title">AI Extraction Engine</div>
+              <div class="settings-section-sub">Configure the language model used for field extraction.</div>
+              <div class="form-group"><label class="form-label">Active Model</label><select class="form-select"><option selected>llama3.1:8b (local — recommended)</option><option>llama3.1:70b (local — high accuracy)</option><option>mistral:7b (local — fast)</option><option>GPT-4o (cloud — requires API key)</option></select><div class="form-helper">Local models require Ollama. Cloud models use the API key configured in Integrations.</div></div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Max Inference Tokens</label><input class="form-input" type="number" value="2048" min="512" max="8192"><div class="form-helper">Higher values handle larger documents</div></div>
+                <div class="form-group"><label class="form-label">Temperature</label><input class="form-input" type="number" value="0.1" min="0" max="1" step="0.05"><div class="form-helper">Lower = more deterministic (recommended: 0.1)</div></div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">Document Type Profiles</div>
+              <div class="settings-section-sub">Configure which fields are extracted per document type.</div>
+              <div class="form-group"><label class="form-label">Document type to configure</label><select class="form-select" id="doc-type-sel" onchange="updateDocTypeFields()"><option value="invoice">Invoice</option><option value="deed">Land Deed</option><option value="form">Government Form</option><option value="contract">Contract</option></select></div>
+              <div id="doc-type-fields">
+                <div class="form-group"><label class="form-label">Fields to extract (Invoice)</label>
+                  <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" checked><span>Vendor Name</span></label>
+                    <label class="checkbox-item"><input type="checkbox" checked><span>Invoice Number</span></label>
+                    <label class="checkbox-item"><input type="checkbox" checked><span>Invoice Date</span></label>
+                    <label class="checkbox-item"><input type="checkbox" checked><span>Total Amount</span></label>
+                    <label class="checkbox-item"><input type="checkbox" checked><span>Tax Amount / VAT</span></label>
+                    <label class="checkbox-item"><input type="checkbox" checked><span>Line Items</span></label>
+                    <label class="checkbox-item"><input type="checkbox"><span>Payment Terms</span></label>
+                    <label class="checkbox-item"><input type="checkbox"><span>PO Number</span></label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Use custom prompt for this type</div><div class="form-helper">Override the default extraction prompt with a custom instruction</div></div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+              </div>
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-ghost">↺ Reset to Defaults</button>
+              <div style="display:flex;gap:10px;"><button class="btn btn-secondary">Cancel</button><button class="btn btn-primary">Save Changes</button></div>
+            </div>
+          </div><!-- /extraction -->
+
+          <!-- INTEGRATIONS SETTINGS -->
+          <div class="settings-panel" id="panel-integrations-settings">
+            <div class="settings-section">
+              <div class="settings-section-title">REST API Configuration</div>
+              <div class="settings-section-sub">Settings for the DocMaster REST API served on this node.</div>
+              <div class="form-group"><label class="form-label">API Base URL</label><input class="form-input mono" value="https://node-01.docmaster.local/dm/v1/"><div class="form-helper">Base URL for all API endpoints</div></div>
+              <div class="form-group"><label class="form-label">Active API Key</label><div class="key-display"><span>dm_live_a8f3c291e67b40da9f3e12b804d7c12a2a9f</span><button class="btn btn-sm btn-secondary">Regenerate</button></div><div class="form-helper">Rotate this key if it has been compromised. Old key is immediately invalidated.</div></div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Rate Limit (req/min)</label><input class="form-input" type="number" value="120"><div class="form-helper">Per API key, per minute</div></div>
+                <div class="form-group"><label class="form-label">Max Upload Size</label><select class="form-select"><option>10 MB</option><option selected>50 MB</option><option>100 MB</option><option>Unlimited</option></select></div>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Require API key on all endpoints</div><div class="form-helper">If disabled, health and metrics endpoints are public</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">SFTP Watcher</div>
+              <div class="settings-section-sub">Automatically ingest documents dropped into an SFTP directory.</div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">SFTP Host</label><input class="form-input mono" value="sftp.registry.gov.gy"></div>
+                <div class="form-group"><label class="form-label">Port</label><input class="form-input" type="number" value="22"></div>
+              </div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Username</label><input class="form-input mono" value="docmaster-svc"></div>
+                <div class="form-group"><label class="form-label">Auth Method</label><select class="form-select"><option selected>SSH Key (recommended)</option><option>Password</option></select></div>
+              </div>
+              <div class="form-group"><label class="form-label">Watch Directory</label><input class="form-input mono" value="/uploads/incoming/"><div class="form-helper">DocMaster will poll this path and auto-ingest new files</div></div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Poll Interval (seconds)</label><input class="form-input" type="number" value="30" min="5" max="3600"></div>
+                <div class="form-group"><label class="form-label">Move to archive after ingestion</label><select class="form-select"><option selected>Yes — /uploads/processed/</option><option>Yes — delete</option><option>No — leave in place</option></select></div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Webhook Output</div>
+              <div class="settings-section-sub">POST extracted data to an external endpoint on job completion.</div>
+              <div class="form-group"><label class="form-label">Webhook URL</label><input class="form-input mono" value="https://erm.registry.gov.gy/api/ingest"><div class="form-helper">DocMaster POSTs JSON extraction results here on each completion</div></div>
+              <div class="form-group"><label class="form-label">Secret Header Value</label><input class="form-input mono" type="password" value="wh_secret_abc123def456"><div class="form-helper">Sent as X-DM-Secret header for endpoint verification</div></div>
+              <div class="form-group"><label class="form-label">Retry failed deliveries</label><select class="form-select"><option selected>Yes — 3 retries with exponential backoff</option><option>Yes — 1 retry</option><option>No</option></select></div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Include raw OCR text in payload</div><div class="form-helper">Adds raw extracted text to the webhook JSON (increases payload size)</div></div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+              </div>
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-ghost">↺ Reset to Defaults</button>
+              <div style="display:flex;gap:10px;"><button class="btn btn-secondary">Cancel</button><button class="btn btn-primary">Save Changes</button></div>
+            </div>
+          </div><!-- /integrations-settings -->
+
+          <!-- STORAGE & BACKUP -->
+          <div class="settings-panel" id="panel-storage">
+            <div class="settings-section">
+              <div class="settings-section-title">Local Storage</div>
+              <div class="settings-section-sub">Paths and retention rules for documents stored on this appliance.</div>
+              <div class="form-group"><label class="form-label">Document Storage Path</label><input class="form-input mono" value="/var/docmaster/documents/"><div class="form-helper">Root directory for all ingested documents and extracted data</div></div>
+              <div class="form-group"><label class="form-label">Temp / Working Directory</label><input class="form-input mono" value="/var/docmaster/tmp/"><div class="form-helper">Used during processing. Cleared automatically after each job.</div></div>
+              <div class="form-group"><label class="form-label">Document retention policy</label><select class="form-select"><option>Keep forever</option><option selected>Keep for 7 years (recommended)</option><option>Keep for 5 years</option><option>Keep for 1 year</option><option>Custom…</option></select><div class="form-helper">Documents older than this threshold will be archived or deleted</div></div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Archive before deletion</div><div class="form-helper">Copy to S3-compatible storage before removing from local disk</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Remote Archive (S3-Compatible)</div>
+              <div class="settings-section-sub">Long-term document archive configuration.</div>
+              <div class="form-group"><label class="form-label">S3 Endpoint URL</label><input class="form-input mono" value="http://s3.archive.internal:9000"><div class="form-helper">MinIO, Ceph, or any S3-compatible endpoint</div></div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Bucket Name</label><input class="form-input mono" value="docmaster-archive-prod"></div>
+                <div class="form-group"><label class="form-label">Region</label><input class="form-input mono" value="us-east-1"></div>
+              </div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Access Key ID</label><input class="form-input mono" value="DMACC••••••••••••••"></div>
+                <div class="form-group"><label class="form-label">Secret Access Key</label><input class="form-input mono" type="password" value="superSecretKey"></div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Automated Backups</div>
+              <div class="settings-section-sub">Schedule regular backups of the database and document index.</div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Enable automated database backups</div><div class="form-helper">Daily PostgreSQL dump compressed and encrypted</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Backup schedule</label><select class="form-select"><option selected>Daily at 02:00 AM</option><option>Every 6 hours</option><option>Weekly (Sunday 02:00)</option></select></div>
+                <div class="form-group"><label class="form-label">Backup retention</label><select class="form-select"><option>7 days</option><option selected>30 days</option><option>90 days</option></select></div>
+              </div>
+              <div style="font-size:12.5px;color:var(--text-secondary);margin-top:4px;">Last backup: <strong>Mar 3, 2026 02:00 AM</strong> · 1.2 GB · Status: <span style="color:var(--success);">Success ✓</span></div>
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-ghost">↺ Reset to Defaults</button>
+              <div style="display:flex;gap:10px;"><button class="btn btn-secondary">Cancel</button><button class="btn btn-primary">Save Changes</button></div>
+            </div>
+          </div><!-- /storage -->
+
+          <!-- SECURITY & ACCESS -->
+          <div class="settings-panel" id="panel-security">
+            <div class="settings-section">
+              <div class="settings-section-title">User Management</div>
+              <div class="settings-section-sub">Manage local operator accounts. For SSO, configure Active Directory in Integrations.</div>
+              <div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn btn-sm btn-primary">+ Add User</button></div>
+              <div class="user-table-wrap">
+                <div class="user-row header"><span></span><span>User</span><span>Role</span><span>Last Login</span><span>Actions</span></div>
+                <div class="user-row">
+                  <div class="user-avatar" style="background:linear-gradient(135deg,#0369a1,#38bdf8);">AU</div>
+                  <div><div style="font-weight:500;">Admin User</div><div style="font-size:11.5px;color:var(--text-secondary);">admin@registry.gov.gy</div></div>
+                  <span class="tag tag-red">Admin</span>
+                  <span style="font-size:12px;color:var(--text-secondary);">Today 09:14</span>
+                  <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-ghost">Edit</button></div>
+                </div>
+                <div class="user-row">
+                  <div class="user-avatar" style="background:linear-gradient(135deg,#059669,#10b981);">SC</div>
+                  <div><div style="font-weight:500;">Sarah Chen</div><div style="font-size:11.5px;color:var(--text-secondary);">s.chen@registry.gov.gy</div></div>
+                  <span class="tag tag-blue">Operator</span>
+                  <span style="font-size:12px;color:var(--text-secondary);">Today 08:30</span>
+                  <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-ghost">Edit</button><button class="btn btn-sm btn-danger">Disable</button></div>
+                </div>
+                <div class="user-row">
+                  <div class="user-avatar" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">MJ</div>
+                  <div><div style="font-weight:500;">Marcus Johnson</div><div style="font-size:11.5px;color:var(--text-secondary);">m.johnson@registry.gov.gy</div></div>
+                  <span class="tag tag-blue">Operator</span>
+                  <span style="font-size:12px;color:var(--text-secondary);">Mar 1, 2026</span>
+                  <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-ghost">Edit</button><button class="btn btn-sm btn-danger">Disable</button></div>
+                </div>
+                <div class="user-row">
+                  <div class="user-avatar" style="background:linear-gradient(135deg,#d97706,#f59e0b);">RV</div>
+                  <div><div style="font-weight:500;">Raj Vasquez</div><div style="font-size:11.5px;color:var(--text-secondary);">r.vasquez@registry.gov.gy</div></div>
+                  <span class="tag tag-green">Reviewer</span>
+                  <span style="font-size:12px;color:var(--text-secondary);">Feb 28, 2026</span>
+                  <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-ghost">Edit</button><button class="btn btn-sm btn-danger">Disable</button></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Password &amp; Session Policy</div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Minimum password length</label><input class="form-input" type="number" value="12" min="8"></div>
+                <div class="form-group"><label class="form-label">Session timeout (minutes)</label><input class="form-input" type="number" value="30" min="5"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Require two-factor authentication (TOTP)</div><div class="form-helper">All users must enroll 2FA within 24h of account creation</div></div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Enforce password complexity</div><div class="form-helper">Require uppercase, lowercase, number, and special character</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Lock account after failed logins</div><div class="form-helper">Lock after 5 consecutive failed attempts for 15 minutes</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Audit &amp; Compliance</div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Enable audit log</div><div class="form-helper">Log all user actions: logins, corrections, exports, setting changes</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Encrypt audit log at rest</div><div class="form-helper">AES-256 encryption on the audit log database table</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-group" style="margin-top:12px;"><label class="form-label">Audit log retention</label><select class="form-select"><option>1 year</option><option selected>5 years</option><option>7 years</option><option>Indefinitely</option></select></div>
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-ghost">↺ Reset to Defaults</button>
+              <div style="display:flex;gap:10px;"><button class="btn btn-secondary">Cancel</button><button class="btn btn-primary">Save Changes</button></div>
+            </div>
+          </div><!-- /security -->
+
+          <!-- LICENSE & UPDATES -->
+          <div class="settings-panel" id="panel-license">
+            <div class="settings-section">
+              <div class="settings-section-title">License Information</div>
+              <div class="settings-section-sub">Your current DocMaster entitlement.</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:var(--r-md);padding:16px;text-align:center;"><div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Status</div><div style="font-size:18px;font-weight:700;color:var(--success);">✓ Valid</div></div>
+                <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;text-align:center;"><div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Tier</div><div style="font-size:18px;font-weight:700;">Enterprise</div></div>
+                <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;text-align:center;"><div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Expires</div><div style="font-size:18px;font-weight:700;">347 days</div></div>
+              </div>
+              <div class="form-group"><label class="form-label">License Key</label><div class="key-display"><span>DM-ENT-2024-••••-••••-••••-A72F</span><button class="btn btn-sm btn-secondary">Reveal</button></div></div>
+              <div class="form-group"><label class="form-label">Licensee</label><input class="form-input" value="Guyana Land Registry — Ministry of Natural Resources" readonly></div>
+              <div style="display:flex;gap:10px;margin-top:4px;"><button class="btn btn-secondary">📋 Copy License Key</button><button class="btn btn-secondary">📄 Export Certificate</button></div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Software Updates</div>
+              <div class="settings-section-sub">Current version: <strong>DocMaster v2.4.1</strong> · Channel: Stable</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div><div style="font-weight:500;">v2.5.0 — Available</div><div style="font-size:12.5px;color:var(--text-secondary);">Released Feb 28, 2026 · OCR accuracy improvements, PaddleOCR support</div></div>
+                <button class="btn btn-primary">↓ Download &amp; Install</button>
+              </div>
+              <div class="update-track">
+                <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">Blue/Green Deployment Progress</div>
+                <div class="update-stages">
+                  <div class="update-stage done"><div class="stage-circle done">✓</div><div class="stage-label">Download</div><div class="tl-time">2m 14s</div></div>
+                  <div class="update-stage done"><div class="stage-circle done">✓</div><div class="stage-label">Verify</div><div class="tl-time">0s</div></div>
+                  <div class="update-stage active"><div class="stage-circle active">…</div><div class="stage-label">Stage</div><div class="tl-time">In progress</div></div>
+                  <div class="update-stage pending"><div class="stage-circle pending">4</div><div class="stage-label">Cutover</div><div class="tl-time">—</div></div>
+                  <div class="update-stage pending"><div class="stage-circle pending">5</div><div class="stage-label">Verify Live</div><div class="tl-time">—</div></div>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);">Blue instance (v2.4.1) remains live until green instance (v2.5.0) passes health checks. Zero-downtime cutover.</div>
+              </div>
+              <div class="form-group" style="margin-top:16px;"><label class="form-label">Update channel</label><select class="form-select"><option selected>Stable (recommended)</option><option>LTS (long-term support)</option><option>Beta</option></select></div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Automatic security patches</div><div class="form-helper">Apply minor security patches automatically (requires restart)</div></div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+              </div>
+            </div>
+          </div><!-- /license -->
+
+          <!-- ADVANCED -->
+          <div class="settings-panel" id="panel-advanced">
+            <div class="alert-banner alert-warn">⚠️ Advanced settings can affect system stability. Changes take effect immediately unless noted.</div>
+            <div class="settings-section">
+              <div class="settings-section-title">Logging &amp; Diagnostics</div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Log level</label><select class="form-select"><option>ERROR only</option><option selected>INFO (recommended)</option><option>DEBUG (verbose)</option><option>TRACE (very verbose)</option></select><div class="form-helper">Higher verbosity impacts disk I/O</div></div>
+                <div class="form-group"><label class="form-label">Log retention (days)</label><input class="form-input" type="number" value="30" min="1"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Log output path</label><input class="form-input mono" value="/var/log/docmaster/"><div class="form-helper">System and application logs are written here</div></div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Remote syslog forwarding</div><div class="form-helper">Forward logs to a central SIEM / syslog server</div></div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+              </div>
+              <div class="form-group"><label class="form-label">Syslog target (UDP)</label><input class="form-input mono" placeholder="syslog.internal:514" disabled></div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Performance Tuning</div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">Max concurrent workers</label><input class="form-input" type="number" value="4" min="1" max="64"><div class="form-helper">Total parallel processing jobs</div></div>
+                <div class="form-group"><label class="form-label">Queue check interval (ms)</label><input class="form-input" type="number" value="500" min="100"><div class="form-helper">How often the queue runner polls for new jobs</div></div>
+              </div>
+              <div class="form-row-2col">
+                <div class="form-group"><label class="form-label">HTTP request timeout (s)</label><input class="form-input" type="number" value="30" min="5"></div>
+                <div class="form-group"><label class="form-label">Webhook delivery timeout (s)</label><input class="form-input" type="number" value="10" min="3"></div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">Maintenance</div>
+              <div class="form-group"><label class="form-label">Scheduled maintenance window</label><select class="form-select"><option>No scheduled window</option><option selected>Sunday 02:00–04:00 AM</option><option>Saturday 01:00–03:00 AM</option><option>Custom…</option></select><div class="form-helper">Queue is paused and updates are applied during this window</div></div>
+              <div class="form-row">
+                <div class="form-row-info"><div class="form-label">Debug mode</div><div class="form-helper">Expose detailed error traces in API responses. Disable in production.</div></div>
+                <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:12px;">
+                <button class="btn btn-secondary">🔄 Restart Services</button>
+                <button class="btn btn-secondary">🧹 Clear Temp Files</button>
+                <button class="btn btn-danger">⚠️ Factory Reset</button>
+              </div>
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-ghost">↺ Reset to Defaults</button>
+              <div style="display:flex;gap:10px;"><button class="btn btn-secondary">Cancel</button><button class="btn btn-primary">Save Changes</button></div>
+            </div>
+          </div><!-- /advanced -->
+
+        </div><!-- end settings panels container -->
+      </div><!-- end settings layout -->
+    </div><!-- end settings page -->
+
+  </div><!-- end content -->
+</div><!-- end main -->
+</div><!-- end app -->
+
+
+<!-- ══════════════════ DOCUMENT DETAIL MODAL ══════════════════ -->
+<div class="modal-overlay hidden" id="doc-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Land_Registry_Deed_034.pdf</div>
+        <div class="modal-subtitle">Job #JOB-0898 · Deed · Uploaded via SFTP · Mar 3, 2026 09:14 AM · 1.2 MB · 3 pages</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="status-pill sp-complete"><span class="dot"></span>Complete</span>
+        <div class="modal-close" onclick="closeModal('doc-modal')">✕</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <!-- Processing timeline -->
+      <div class="timeline" style="margin-bottom:24px;">
+        <div class="tl-step done"><div class="tl-dot done">✓</div><div class="tl-label">Ingested</div><div class="tl-time">09:14:02</div></div>
+        <div class="tl-step done"><div class="tl-dot done">✓</div><div class="tl-label">OCR</div><div class="tl-time">09:14:08 · 6s</div></div>
+        <div class="tl-step done"><div class="tl-dot done">✓</div><div class="tl-label">Extracted</div><div class="tl-time">09:14:12 · 4s</div></div>
+        <div class="tl-step done"><div class="tl-dot done">✓</div><div class="tl-label">Validated</div><div class="tl-time">09:14:13 · 1s</div></div>
+        <div class="tl-step active"><div class="tl-dot done">✓</div><div class="tl-label">Complete</div><div class="tl-time">09:14:13</div></div>
+      </div>
+      <div class="modal-split">
+        <!-- Document Preview -->
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:12px;">Document Preview</div>
+          <div class="doc-preview-box">
+            <div class="doc-preview-icon">📄</div>
+            <div class="doc-preview-label">Scanned Document Image</div>
+            <div class="doc-preview-sub">Page 1 of 3 · Land Registry Deed</div>
+          </div>
+          <div class="doc-nav-bar">
+            <button class="btn btn-sm btn-secondary">‹ Prev</button>
+            <span style="font-size:12.5px;color:var(--text-secondary);padding:0 8px;">Page 1 / 3</span>
+            <button class="btn btn-sm btn-secondary">Next ›</button>
+          </div>
+        </div>
+        <!-- Extracted Fields -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="font-size:14px;font-weight:600;">Extracted Information</div>
+            <span class="field-conf fc-high" style="padding:4px 10px;">Overall: 94.2%</span>
+          </div>
+          <div class="field-extraction">
+            <div class="field-item"><div class="field-header"><span class="field-name">Property Address</span><span class="field-conf fc-high">98%</span></div><input type="text" class="form-input" value="142 Ocean View Drive, Georgetown, Region 4"></div>
+            <div class="field-item"><div class="field-header"><span class="field-name">Owner Name</span><span class="field-conf fc-med">78%</span></div><input type="text" class="form-input" value="John Alexander Smith"></div>
+            <div class="field-item"><div class="field-header"><span class="field-name">Plot Number</span><span class="field-conf fc-high">96%</span></div><input type="text" class="form-input" value="LOT-2024-0342"></div>
+            <div class="field-item"><div class="field-header"><span class="field-name">Registration Date</span><span class="field-conf fc-med">82%</span></div><input type="text" class="form-input" value="March 15, 2024"></div>
+            <div class="field-item"><div class="field-header"><span class="field-name">Land Area (sq ft)</span><span class="field-conf fc-high">91%</span></div><input type="text" class="form-input" value="4,500"></div>
+            <div class="field-item"><div class="field-header"><span class="field-name">Transport Number</span><span class="field-conf fc-high">95%</span></div><input type="text" class="form-input" value="TR-2024-00891"></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="btn btn-secondary" style="flex:1;">📥 Export JSON</button>
+            <button class="btn btn-primary" style="flex:1;">💾 Save Corrections</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════ UPLOAD MODAL ══════════════════ -->
+<div class="modal-overlay hidden" id="upload-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div><div class="modal-title">Upload Documents</div><div class="modal-subtitle">Accepted: PDF, TIFF, JPEG, PNG · Max 50 MB per file</div></div>
+      <div class="modal-close" onclick="closeModal('upload-modal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+        <div class="dropzone-icon">📂</div>
+        <div class="dropzone-text">Drop files here or click to browse</div>
+        <div class="dropzone-sub">PDF, TIFF, JPG, PNG — up to 50 MB each</div>
+        <input type="file" id="file-input" multiple accept=".pdf,.tiff,.jpg,.jpeg,.png" style="display:none">
+      </div>
+      <div style="margin-top:20px;">
+        <div class="form-group"><label class="form-label">Document type (optional)</label><select class="form-select"><option value="">Auto-detect</option><option>Invoice</option><option>Land Deed</option><option>Government Form</option><option>Contract</option><option>Handwritten</option></select><div class="form-helper">Leave as auto-detect to let DocMaster classify automatically</div></div>
+        <div class="form-row-2col">
+          <div class="form-group"><label class="form-label">Priority</label><select class="form-select"><option>High</option><option selected>Normal</option><option>Low</option></select></div>
+          <div class="form-group"><label class="form-label">Assign to queue</label><select class="form-select"><option selected>Default</option><option>High-Volume</option><option>Review-Only</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-row-info"><div class="form-label">Notify me when complete</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('upload-modal')">Cancel</button>
+      <button class="btn btn-primary">📤 Start Upload</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ── NAVIGATION ──
+document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + this.dataset.page).classList.add('active');
+  });
+});
+
+// ── SETTINGS NAV ──
+document.querySelectorAll('.settings-nav-item[data-panel]').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+    document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + this.dataset.panel).classList.add('active');
+  });
+});
+
+// ── FILTER PILLS ──
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    this.closest('.filters').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ── CHART TABS ──
+document.querySelectorAll('.chart-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    this.closest('.chart-tabs').querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ── MODALS ──
+function showDocModal() {
+  document.getElementById('doc-modal').classList.remove('hidden');
+}
+function showUploadModal() {
+  document.getElementById('upload-modal').classList.remove('hidden');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.add('hidden');
+  });
+});
+
+// ── DOCUMENT ROWS ──
+document.querySelectorAll('.document-row').forEach(row => {
+  row.addEventListener('click', function(e) {
+    if (e.target.type !== 'checkbox' && !e.target.classList.contains('table-action')) {
+      showDocModal();
+    }
+  });
+});
+
+// ── DRAG & DROP ZONE ──
+const dz = document.getElementById('dropzone');
+if (dz) {
+  ['dragover','dragenter'].forEach(e => dz.addEventListener(e, function(ev) { ev.preventDefault(); dz.classList.add('drag-over'); }));
+  ['dragleave','drop'].forEach(e => dz.addEventListener(e, function(ev) { ev.preventDefault(); dz.classList.remove('drag-over'); }));
+}
+
+// ── TERMINAL BLINK ──
+let blink = true;
+setInterval(() => {
+  const el = document.getElementById('blink');
+  if (el) { el.style.opacity = blink ? '0' : '1'; blink = !blink; }
+}, 600);
+
+// ── LIVE LOG TICKER ──
+const logLines = [
+  '<span class="log-ts">[{t}] </span><span class="log-ok">[EXTRACT]</span> #JOB-0912 page 9/12 extracted · confidence 91.4%',
+  '<span class="log-ts">[{t}] </span><span class="log-info">[API]    </span> GET /dm/v1/queue/status · 200 OK · 2ms',
+  '<span class="log-ts">[{t}] </span><span class="log-ok">[QUEUE]  </span> Worker heartbeat OK · 4 workers healthy',
+  '<span class="log-ts">[{t}] </span><span class="log-info">[OCR]    </span> Processing page 10/12…',
+  '<span class="log-ts">[{t}] </span><span class="log-warn">[DISK]   </span> Disk usage at 83.2% · threshold: 80%',
+  '<span class="log-ts">[{t}] </span><span class="log-ok">[EXTRACT]</span> #JOB-0911 complete · Invoice_Batch · 14 fields · 4.1s',
+];
+let logIdx = 0;
+setInterval(() => {
+  const terminal = document.getElementById('terminal-log');
+  if (!terminal) return;
+  const cursor = document.getElementById('log-cursor');
+  const now = new Date();
+  const t = now.toTimeString().slice(0,8);
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = logLines[logIdx % logLines.length].replace('{t}', t);
+  terminal.insertBefore(line, cursor);
+  if (terminal.children.length > 30) terminal.removeChild(terminal.children[1]);
+  terminal.scrollTop = terminal.scrollHeight;
+  logIdx++;
+}, 3200);
+
+// ── BUTTONS FEEDBACK ──
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    if (e.target.tagName === 'INPUT') return;
+    this.style.transform = 'scale(0.97)';
+    setTimeout(() => this.style.transform = '', 120);
+  });
+});
+
+// ── COPY BUTTONS ──
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const orig = this.textContent;
+    this.textContent = '✓ Copied';
+    this.style.color = 'var(--success)';
+    setTimeout(() => { this.textContent = orig; this.style.color = ''; }, 1500);
+  });
+});
+</script>
+</body>
+</html>
