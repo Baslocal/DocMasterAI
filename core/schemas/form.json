@@ -1,0 +1,87 @@
+{
+    "doc_type": "form",
+    "display_name": "Government / Administrative Form",
+    "description": "Government forms, applications, registrations, permits, certificates",
+    "fields": [
+        {
+            "name": "form_title",
+            "display_name": "Form Title / Name",
+            "type": "text",
+            "required": true,
+            "description": "Official title or name of the form"
+        },
+        {
+            "name": "form_number",
+            "display_name": "Form Reference Number",
+            "type": "identifier",
+            "required": false,
+            "description": "Official form number or reference code",
+            "example": "MoH-F-204"
+        },
+        {
+            "name": "applicant_name",
+            "display_name": "Applicant / Subject Name",
+            "type": "text",
+            "required": true,
+            "description": "Full name of the person the form concerns"
+        },
+        {
+            "name": "applicant_id",
+            "display_name": "Applicant ID / NIN",
+            "type": "identifier",
+            "required": false,
+            "description": "National ID, passport number, or other government identifier"
+        },
+        {
+            "name": "applicant_dob",
+            "display_name": "Date of Birth",
+            "type": "date",
+            "required": false,
+            "description": "Applicant date of birth",
+            "format": "YYYY-MM-DD"
+        },
+        {
+            "name": "applicant_address",
+            "display_name": "Applicant Address",
+            "type": "text",
+            "required": false,
+            "description": "Residential or mailing address"
+        },
+        {
+            "name": "submission_date",
+            "display_name": "Submission / Issue Date",
+            "type": "date",
+            "required": false,
+            "description": "Date the form was submitted or issued",
+            "format": "YYYY-MM-DD"
+        },
+        {
+            "name": "issuing_authority",
+            "display_name": "Issuing Authority",
+            "type": "text",
+            "required": false,
+            "description": "Name of the government ministry, department, or authority"
+        },
+        {
+            "name": "reference_number",
+            "display_name": "Case / Reference Number",
+            "type": "identifier",
+            "required": false,
+            "description": "Case tracking or reference number assigned by the authority"
+        },
+        {
+            "name": "officer_name",
+            "display_name": "Authorizing Officer",
+            "type": "text",
+            "required": false,
+            "description": "Name of the officer who signed or approved the form"
+        },
+        {
+            "name": "purpose",
+            "display_name": "Purpose / Description",
+            "type": "text",
+            "required": false,
+            "description": "Brief description of the form's purpose or the application subject"
+        }
+    ]
+}

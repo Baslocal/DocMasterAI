@@ -1,0 +1,29 @@
+[Unit]
+Description=DocMaster dm-bridge — External Connector Daemon (Drive, Email, Fax, SFTP)
+Documentation=file:///opt/docmaster/DocMaster/DocMaster_AI_Builder_Implementation_Brief.md
+After=network.target dm-core.service postgresql.service redis.service
+Requires=postgresql.service redis.service
+Wants=dm-core.service
+
+[Service]
+Type=exec
+User=dmuser
+Group=docgroup
+EnvironmentFile=/opt/docmaster/config/dm.env
+WorkingDirectory=/opt/docmaster
+ExecStart=/opt/docmaster/bin/dm-bridge
+Restart=on-failure
+RestartSec=10
+WatchdogSec=30
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dm-bridge
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/docmaster/ingest /opt/docmaster/logs /opt/docmaster/tmp
+
+[Install]
+WantedBy=multi-user.target

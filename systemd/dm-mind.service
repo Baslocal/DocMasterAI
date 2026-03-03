@@ -1,0 +1,37 @@
+[Unit]
+Description=DocMaster dm-mind — Ollama LLM Wrapper + Inference API
+Documentation=file:///opt/docmaster/DocMaster/DocMaster_AI_Builder_Implementation_Brief.md
+After=network.target ollama.service
+Requires=ollama.service
+
+[Service]
+Type=exec
+User=dmuser
+Group=docgroup
+EnvironmentFile=/opt/docmaster/config/dm.env
+WorkingDirectory=/opt/docmaster
+# Wait for Ollama to be ready before signaling success
+ExecStartPost=/opt/docmaster/bin/wait-for-ollama.sh
+# dm-mind itself is a thin monitoring wrapper — Ollama runs as a separate service
+ExecStart=/opt/docmaster/bin/dm-mind
+Restart=on-failure
+RestartSec=10
+WatchdogSec=30
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dm-mind
+
+# Ollama environment — STRICT: localhost only, never exposed to network
+Environment=OLLAMA_HOST=127.0.0.1:11434
+Environment=OLLAMA_MODELS=/opt/docmaster/models
+Environment=OLLAMA_KEEP_ALIVE=5m
+Environment=OLLAMA_NUM_PARALLEL=1
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=false
+ProtectSystem=strict
+ReadWritePaths=/opt/docmaster/models /opt/docmaster/logs
+
+[Install]
+WantedBy=multi-user.target

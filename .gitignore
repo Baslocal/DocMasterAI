@@ -1,0 +1,119 @@
+# DocMaster — .gitignore
+# Never commit secrets, model weights, or build artifacts
+
+# ── Secrets & Credentials ──────────────────────────────────────────────────
+*.key
+*.pem
+*.p12
+*.pfx
+dm.env
+!dm.env.template
+config/license.key
+.env
+.env.*
+!.env.example
+
+# ── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+ENV/
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ── Alembic ─────────────────────────────────────────────────────────────────
+# Keep version files but ignore local dev DB state
+# (version files are committed; nothing else from alembic output)
+
+# ── Node / React ────────────────────────────────────────────────────────────
+node_modules/
+www/dist/
+www/.vite/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ── Model weights ───────────────────────────────────────────────────────────
+# Never commit model files — they are vendored via the build pipeline
+models/
+*.onnx
+*.mlmodel
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+*.pt
+*.pth
+
+# ── Build artifacts ─────────────────────────────────────────────────────────
+dist/
+build/
+*.iso
+*.tar.gz
+*.tar.zst
+*.zip
+*.dmupdate
+*.dmupdate.sig
+
+# ── Logs ────────────────────────────────────────────────────────────────────
+logs/
+*.log
+*.log.*
+
+# ── Temporary / processing ──────────────────────────────────────────────────
+tmp/
+temp/
+*.tmp
+
+# ── OS artifacts ────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ── IDE / Editor ────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# ── Packer build cache ──────────────────────────────────────────────────────
+packer_cache/
+output-*/
+
+# ── PostgreSQL data ─────────────────────────────────────────────────────────
+data/pgdata/
+data/vectors/
+
+# ── Redis persistence ───────────────────────────────────────────────────────
+queue/
+*.rdb
+*.aof
+
+# ── Backups ─────────────────────────────────────────────────────────────────
+backups/
+
+# ── Test output ─────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/

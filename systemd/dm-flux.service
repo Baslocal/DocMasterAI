@@ -1,0 +1,31 @@
+[Unit]
+Description=DocMaster dm-flux — File Watcher + OCR Pipeline Worker
+Documentation=file:///opt/docmaster/DocMaster/DocMaster_AI_Builder_Implementation_Brief.md
+After=network.target postgresql.service redis.service dm-core.service
+Requires=postgresql.service redis.service
+Wants=dm-core.service
+
+[Service]
+Type=exec
+User=dmuser
+Group=docgroup
+EnvironmentFile=/opt/docmaster/config/dm.env
+WorkingDirectory=/opt/docmaster
+# DM_WORKER_COUNT controls number of worker instances (default: 1)
+# GPU deployments with sufficient VRAM may use DM_WORKER_COUNT=2
+ExecStart=/opt/docmaster/core/.venv/bin/python -m flux.worker
+Restart=on-failure
+RestartSec=5
+WatchdogSec=30
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dm-flux
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=false
+ProtectSystem=strict
+ReadWritePaths=/opt/docmaster/tmp /opt/docmaster/logs /opt/docmaster/vault
+
+[Install]
+WantedBy=multi-user.target

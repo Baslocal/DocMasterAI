@@ -1,0 +1,102 @@
+{
+    "doc_type": "invoice",
+    "display_name": "Invoice",
+    "description": "Commercial invoices, tax invoices, billing statements",
+    "fields": [
+        {
+            "name": "invoice_number",
+            "display_name": "Invoice Number",
+            "type": "identifier",
+            "required": true,
+            "description": "Unique invoice reference number",
+            "example": "INV-2024-0012"
+        },
+        {
+            "name": "invoice_date",
+            "display_name": "Invoice Date",
+            "type": "date",
+            "required": true,
+            "description": "Date the invoice was issued",
+            "format": "YYYY-MM-DD"
+        },
+        {
+            "name": "due_date",
+            "display_name": "Due Date",
+            "type": "date",
+            "required": false,
+            "description": "Payment due date",
+            "format": "YYYY-MM-DD"
+        },
+        {
+            "name": "vendor_name",
+            "display_name": "Vendor / Supplier Name",
+            "type": "text",
+            "required": true,
+            "description": "Name of the business or person issuing the invoice"
+        },
+        {
+            "name": "vendor_address",
+            "display_name": "Vendor Address",
+            "type": "text",
+            "required": false,
+            "description": "Full address of the vendor"
+        },
+        {
+            "name": "customer_name",
+            "display_name": "Customer / Bill-To Name",
+            "type": "text",
+            "required": true,
+            "description": "Name of the customer being billed"
+        },
+        {
+            "name": "customer_address",
+            "display_name": "Customer Address",
+            "type": "text",
+            "required": false,
+            "description": "Full billing address of the customer"
+        },
+        {
+            "name": "subtotal",
+            "display_name": "Subtotal (before tax)",
+            "type": "currency",
+            "required": false,
+            "description": "Total before tax/fees"
+        },
+        {
+            "name": "tax_amount",
+            "display_name": "Tax Amount",
+            "type": "currency",
+            "required": false,
+            "description": "Total tax charged"
+        },
+        {
+            "name": "total_amount",
+            "display_name": "Total Amount",
+            "type": "currency",
+            "required": true,
+            "description": "Grand total amount due including all taxes and fees"
+        },
+        {
+            "name": "currency",
+            "display_name": "Currency",
+            "type": "text",
+            "required": false,
+            "description": "Currency code, e.g. USD, TTD, JMD",
+            "example": "TTD"
+        },
+        {
+            "name": "payment_terms",
+            "display_name": "Payment Terms",
+            "type": "text",
+            "required": false,
+            "description": "Payment terms e.g. 'Net 30', 'Due on receipt'"
+        },
+        {
+            "name": "po_number",
+            "display_name": "Purchase Order Number",
+            "type": "identifier",
+            "required": false,
+            "description": "Buyer's purchase order reference number"
+        }
+    ]
+}

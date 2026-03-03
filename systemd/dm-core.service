@@ -1,0 +1,35 @@
+[Unit]
+Description=DocMaster dm-core — FastAPI REST + WebSocket API Server
+Documentation=file:///opt/docmaster/DocMaster/DocMaster_AI_Builder_Implementation_Brief.md
+After=network.target postgresql.service redis.service dm-vault.service
+Requires=postgresql.service
+Wants=redis.service dm-vault.service
+
+[Service]
+Type=exec
+User=dmuser
+Group=docgroup
+EnvironmentFile=/opt/docmaster/config/dm.env
+WorkingDirectory=/opt/docmaster
+ExecStart=/opt/docmaster/core/.venv/bin/uvicorn \
+    app.main:app \
+    --host 0.0.0.0 \
+    --port 8443 \
+    --workers 1 \
+    --log-config /opt/docmaster/config/uvicorn-log.json \
+    --no-access-log
+Restart=on-failure
+RestartSec=5
+WatchdogSec=30
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dm-core
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/docmaster/logs /opt/docmaster/tmp
+
+[Install]
+WantedBy=multi-user.target

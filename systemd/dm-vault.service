@@ -1,0 +1,29 @@
+[Unit]
+Description=DocMaster dm-vault — License Engine + Encrypted Config Store
+Documentation=file:///opt/docmaster/DocMaster/DocMaster_AI_Builder_Implementation_Brief.md
+After=network.target
+# dm-vault has no external dependencies — it derives hardware key at boot
+# and must be ready before dm-core starts
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=dmuser
+Group=docgroup
+EnvironmentFile=/opt/docmaster/config/dm.env
+WorkingDirectory=/opt/docmaster
+ExecStart=/opt/docmaster/bin/dm-vault --init
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dm-vault
+
+# Security — vault has access to license.key and hardware identifiers
+NoNewPrivileges=true
+PrivateTmp=false
+ProtectSystem=strict
+# Needs to read hardware identifiers via dmidecode
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

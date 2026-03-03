@@ -1,0 +1,79 @@
+{
+    "doc_type": "deed",
+    "display_name": "Land Registry Deed",
+    "description": "Property transfer documents, land registry deeds, title deeds",
+    "fields": [
+        {
+            "name": "property_address",
+            "display_name": "Property Address",
+            "type": "text",
+            "required": true,
+            "description": "Full street address of the property being transferred"
+        },
+        {
+            "name": "owner_name",
+            "display_name": "Owner Name",
+            "type": "text",
+            "required": true,
+            "description": "Full legal name of the property owner or grantee"
+        },
+        {
+            "name": "grantor_name",
+            "display_name": "Grantor Name",
+            "type": "text",
+            "required": false,
+            "description": "Previous owner who transferred the property"
+        },
+        {
+            "name": "plot_number",
+            "display_name": "Plot / Lot Number",
+            "type": "identifier",
+            "required": false,
+            "description": "Government-assigned lot or plot identifier",
+            "example": "LOT-2024-0342"
+        },
+        {
+            "name": "parcel_area",
+            "display_name": "Parcel Area",
+            "type": "text",
+            "required": false,
+            "description": "Size of the parcel, e.g., '0.75 acres' or '3,000 sq ft'"
+        },
+        {
+            "name": "registration_date",
+            "display_name": "Registration Date",
+            "type": "date",
+            "required": true,
+            "description": "Date the deed was officially registered",
+            "format": "YYYY-MM-DD"
+        },
+        {
+            "name": "registration_number",
+            "display_name": "Registration Number",
+            "type": "identifier",
+            "required": false,
+            "description": "Official registration or volume/folio reference number"
+        },
+        {
+            "name": "consideration_amount",
+            "display_name": "Consideration / Purchase Price",
+            "type": "currency",
+            "required": false,
+            "description": "Purchase price or consideration paid for the property"
+        },
+        {
+            "name": "notary_name",
+            "display_name": "Notary / Registrar Name",
+            "type": "text",
+            "required": false,
+            "description": "Name of the notary or land registrar who certified the deed"
+        },
+        {
+            "name": "witness_names",
+            "display_name": "Witness Names",
+            "type": "text",
+            "required": false,
+            "description": "Names of witnesses present at signing, if listed"
+        }
+    ]
+}

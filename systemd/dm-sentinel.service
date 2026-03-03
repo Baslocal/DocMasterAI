@@ -1,0 +1,27 @@
+[Unit]
+Description=DocMaster dm-sentinel — Health Monitor + Watchdog Daemon
+Documentation=file:///opt/docmaster/DocMaster/DocMaster_AI_Builder_Implementation_Brief.md
+After=network.target dm-core.service dm-flux.service dm-mind.service dm-bridge.service dm-vault.service
+
+[Service]
+Type=exec
+User=dmuser
+Group=docgroup
+EnvironmentFile=/opt/docmaster/config/dm.env
+WorkingDirectory=/opt/docmaster
+ExecStart=/opt/docmaster/bin/dm-sentinel
+Restart=on-failure
+RestartSec=15
+WatchdogSec=30
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dm-sentinel
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/docmaster/logs
+
+[Install]
+WantedBy=multi-user.target

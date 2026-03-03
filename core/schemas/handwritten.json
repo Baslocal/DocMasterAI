@@ -1,0 +1,45 @@
+{
+    "doc_type": "handwritten",
+    "display_name": "Handwritten Document",
+    "description": "Handwritten letters, notes, records, and manuscripts — full text extraction",
+    "notes": "Handwritten documents use full-text extraction rather than structured field extraction. The LLM transcribes the content verbatim. All output goes into the 'content' field. Operator review is typically triggered by the fixed 0.65 confidence assigned by olmOCR.",
+    "fields": [
+        {
+            "name": "content",
+            "display_name": "Document Content (Full Transcription)",
+            "type": "text",
+            "required": true,
+            "description": "Complete verbatim transcription of all handwritten text in the document, preserving original line breaks and paragraph structure"
+        },
+        {
+            "name": "author_name",
+            "display_name": "Author / Signatory Name",
+            "type": "text",
+            "required": false,
+            "description": "Name of the person who wrote or signed the document, if legible"
+        },
+        {
+            "name": "document_date",
+            "display_name": "Document Date",
+            "type": "date",
+            "required": false,
+            "description": "Date appearing in the document, if present",
+            "format": "YYYY-MM-DD"
+        },
+        {
+            "name": "recipient_name",
+            "display_name": "Recipient / Addressee",
+            "type": "text",
+            "required": false,
+            "description": "Name of the person the document is addressed to, if applicable"
+        },
+        {
+            "name": "document_language",
+            "display_name": "Document Language",
+            "type": "text",
+            "required": false,
+            "description": "Primary language of the document content",
+            "example": "English"
+        }
+    ]
+}

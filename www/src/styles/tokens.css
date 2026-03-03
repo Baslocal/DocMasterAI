@@ -1,0 +1,100 @@
+/**
+ * DocMaster — Design System Tokens
+ * STRICT RULE: These exact values are specified in the Phase 7 UI Layer Spec.
+ * Do not change any token value without updating the spec and all component tests.
+ * All spacing values must be multiples of 8px.
+ */
+
+:root {
+  /* ── Color palette ────────────────────────────────────────────────────── */
+  --color-bg-primary:    #f8fafc;   /* Page background */
+  --color-bg-secondary:  #ffffff;   /* Cards, modals */
+  --color-bg-dark:       #1e293b;   /* Sidebar */
+  --color-text-primary:  #0f172a;   /* Body text */
+  --color-text-secondary: #64748b;  /* Muted text */
+  --color-text-light:    #94a3b8;   /* Placeholder, meta */
+  --color-accent:        #38bdf8;   /* CTA buttons, active nav, focus rings */
+  --color-accent-hover:  #0284c7;   /* Accent hover state */
+  --color-accent-dark:   #0369a1;   /* Accent pressed state */
+  --color-success:       #10b981;   /* Complete status, healthy indicators */
+  --color-warning:       #f59e0b;   /* Review status, disk warnings */
+  --color-error:         #ef4444;   /* Failed status, critical alerts */
+  --color-processing:    #3b82f6;   /* Active queue items */
+  --color-border:        #e2e8f0;   /* Default borders */
+  --color-border-dark:   #cbd5e1;   /* Stronger borders */
+
+  /* ── Typography ───────────────────────────────────────────────────────── */
+  /* System font stack only — zero external font loading */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-heading:  28px;  /* Page headings — semibold */
+  --font-size-section:  18px;  /* Section headings — semibold */
+  --font-size-body:     14px;  /* Body text — regular */
+  --font-size-meta:     12px;  /* Metadata, labels — regular */
+
+  /* ── Layout — all multiples of 8px ──────────────────────────────────── */
+  --sidebar-width:    240px;   /* Fixed sidebar width */
+  --topbar-height:    56px;    /* Top bar height */
+  --content-padding:  32px;    /* Main content area padding */
+
+  /* ── Spacing scale (multiples of 8px) ────────────────────────────────── */
+  --space-1:  8px;
+  --space-2:  16px;
+  --space-3:  24px;
+  --space-4:  32px;
+  --space-5:  40px;
+  --space-6:  48px;
+
+  /* ── Border radius ────────────────────────────────────────────────────── */
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ──────────────────────────────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+}
+
+/* ── Document status CSS classes — MUST match dm_core.document_status enum ── */
+/* queued | processing | complete | review | failed */
+.status-queued     { color: var(--color-text-secondary); }
+.status-processing { color: var(--color-processing); }
+.status-complete   { color: var(--color-success); }
+.status-review     { color: var(--color-warning); }
+.status-failed     { color: var(--color-error); }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-meta);
+  font-weight: 600;
+}
+
+.status-badge.queued     { background: rgba(100,116,139,0.1); color: var(--color-text-secondary); }
+.status-badge.processing { background: rgba(59,130,246,0.1);  color: var(--color-processing); }
+.status-badge.complete   { background: rgba(16,185,129,0.1);  color: var(--color-success); }
+.status-badge.review     { background: rgba(245,158,11,0.1);  color: var(--color-warning); }
+.status-badge.failed     { background: rgba(239,68,68,0.1);   color: var(--color-error); }
+
+/* ── Confidence badge colors (used in Document Detail Modal) ──────────── */
+/* ≥90 → green, 75–89 → orange, <75 → red */
+.confidence-high   { color: var(--color-success); }
+.confidence-medium { color: var(--color-warning); }
+.confidence-low    { color: var(--color-error); }
+
+/* ── Global resets ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}

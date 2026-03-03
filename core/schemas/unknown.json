@@ -1,0 +1,44 @@
+{
+    "doc_type": "unknown",
+    "display_name": "Unknown / Unclassified Document",
+    "description": "Documents that could not be classified with sufficient confidence (< 0.60). Full text is extracted and operator manual classification is required.",
+    "notes": "Documents classified as 'unknown' always require operator review. The operator should reclassify the document type in the UI after reviewing the extracted content.",
+    "fields": [
+        {
+            "name": "content",
+            "display_name": "Document Content (Full Text Extraction)",
+            "type": "text",
+            "required": true,
+            "description": "Complete extracted text from the document. Structure and layout preserved where possible."
+        },
+        {
+            "name": "detected_keywords",
+            "display_name": "Detected Keywords",
+            "type": "text",
+            "required": false,
+            "description": "Comma-separated list of significant keywords or phrases that may help identify the document type"
+        },
+        {
+            "name": "probable_document_type",
+            "display_name": "Probable Document Type",
+            "type": "text",
+            "required": false,
+            "description": "LLM's best guess at the document type based on content analysis, e.g. 'contract', 'certificate', 'letter'"
+        },
+        {
+            "name": "document_date",
+            "display_name": "Document Date (if found)",
+            "type": "date",
+            "required": false,
+            "description": "Any date found in the document",
+            "format": "YYYY-MM-DD"
+        },
+        {
+            "name": "primary_entity",
+            "display_name": "Primary Person or Organization",
+            "type": "text",
+            "required": false,
+            "description": "The most prominently named person or organization in the document"
+        }
+    ]
+}

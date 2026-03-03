@@ -1,0 +1,24 @@
+# DocMaster — /etc/cron.d/docmaster
+# All scheduled jobs in one file.
+# STRICT RULE: All paths reference /opt/docmaster/ (symlink), never -blue or -green.
+# Run as: dmuser
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=""
+
+# ── Nightly encrypted DB backup (02:30 UTC) ───────────────────────────────
+30 2 * * * dmuser /opt/docmaster/bin/dm-backup.sh >> /opt/docmaster/logs/dm-backup.log 2>&1
+
+# ── Backup verification (04:00 UTC) ──────────────────────────────────────
+0 4 * * * dmuser /opt/docmaster/bin/dm-verify-backup.sh >> /opt/docmaster/logs/dm-backup.log 2>&1
+
+# ── Tmp cleanup: failed job dirs older than 24h (03:00 UTC) ──────────────
+0 3 * * * dmuser find /opt/docmaster/tmp -mindepth 1 -maxdepth 1 -type d -mtime +1 -exec rm -rf {} \; >> /opt/docmaster/logs/dm-cleanup.log 2>&1
+
+# ── IVFFlat index check + rebuild if needed (03:30 UTC) ──────────────────
+# Checks embedding row count; builds index only after ≥3,900 rows exist
+30 3 * * * dmuser /opt/docmaster/bin/dm-sentinel --check-ivfflat >> /opt/docmaster/logs/dm-sentinel.log 2>&1
+
+# ── Sentinel health snapshot (every 30 minutes) ────────────────────────────
+*/30 * * * * dmuser /opt/docmaster/bin/dm-sentinel --snapshot >> /opt/docmaster/logs/dm-sentinel.log 2>&1
