@@ -17,6 +17,9 @@
 set -uo pipefail
 IFS=$'\n\t'
 
+# Absolute path to this script's directory (safe regardless of working directory)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # ── Script-level constants ────────────────────────────────────────────────────
 readonly DM_VERSION="1.0.0"
 readonly DM_USER="dmuser"
@@ -31,15 +34,15 @@ readonly LOG_FILE="/tmp/dm-install-$(date -u +%Y%m%d-%H%M%S).log"
 readonly MANIFEST_FILE="${BLUE_DIR}/vault/manifest.lock"
 
 # Pinned versions (update these when upgrading the stack)
-readonly OLLAMA_VERSION="0.4.7"
-readonly OLLAMA_BINARY_URL="https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64"
+readonly OLLAMA_VERSION="0.17.5"
+readonly OLLAMA_BINARY_URL="https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst"
 readonly OLLAMA_SHA256="REPLACE_WITH_PINNED_SHA256"  # Must be set before air-gapped deployment
 
 readonly PG_VERSION="16"
 readonly NODE_VERSION="22"
 
 # Ollama models to pre-pull
-readonly OLLAMA_MODELS=(
+readonly DM_MODELS_TO_PULL=(
     "llama3.1:8b-q4_K_M"
     "nomic-embed-text"
     "qwen2.5-vl:7b"
@@ -533,7 +536,24 @@ install_ollama() {
 
     if [ ! -f "${OLLAMA_BIN}" ]; then
         log "Downloading Ollama v${OLLAMA_VERSION}..."
-        curl -fSL --progress-bar "${OLLAMA_BINARY_URL}" -o "${OLLAMA_BIN}"
+        # Ensure zstd is available for .tar.zst decompression
+        command -v zstd > /dev/null 2>&1 || apt-get install -y -q zstd
+        local OLLAMA_ARCHIVE OLLAMA_TMPDIR
+        OLLAMA_ARCHIVE=$(mktemp --suffix=.tar.zst)
+        OLLAMA_TMPDIR=$(mktemp -d)
+        curl -fSL --progress-bar "${OLLAMA_BINARY_URL}" -o "${OLLAMA_ARCHIVE}"
+        tar -I zstd -xf "${OLLAMA_ARCHIVE}" -C "${OLLAMA_TMPDIR}"
+        # Binary location varies by release — check common paths
+        if [ -f "${OLLAMA_TMPDIR}/bin/ollama" ]; then
+            mv "${OLLAMA_TMPDIR}/bin/ollama" "${OLLAMA_BIN}"
+        elif [ -f "${OLLAMA_TMPDIR}/ollama" ]; then
+            mv "${OLLAMA_TMPDIR}/ollama" "${OLLAMA_BIN}"
+        else
+            err "Could not locate ollama binary in downloaded archive"
+            rm -rf "${OLLAMA_TMPDIR}" "${OLLAMA_ARCHIVE}"
+            return 1
+        fi
+        rm -rf "${OLLAMA_TMPDIR}" "${OLLAMA_ARCHIVE}"
         chmod 750 "${OLLAMA_BIN}"
         chown "${DM_USER}:${DM_GROUP}" "${OLLAMA_BIN}"
         ok "Ollama binary installed at ${OLLAMA_BIN}"
@@ -570,7 +590,7 @@ EOF
             return
         }
 
-        for model in "${OLLAMA_MODELS[@]}"; do
+        for model in "${DM_MODELS_TO_PULL[@]}"; do
             log "Pulling model: ${model}"
             sudo -u "${DM_USER}" \
                 OLLAMA_HOST=127.0.0.1:11434 \
@@ -865,23 +885,26 @@ main() {
     track1_os_hardening
     track2_users
     track3_directories
+    track4_packages
 
-    # Copy application source to install path (if not already there)
+    # Copy application source to install path (after track4 installs rsync)
     # In Method C, the installer bundle is extracted alongside this script
-    if [ -d "$(dirname "$0")/../core" ]; then
+    local REPO_ROOT
+    REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+    if [ -d "${REPO_ROOT}/core" ]; then
         log "Copying application source to ${DM_HOME}..."
-        rsync -a "$(dirname "$0")/../core/" "${DM_HOME}/core/"
-        rsync -a "$(dirname "$0")/../flux/" "${DM_HOME}/flux/" 2>/dev/null || true
-        rsync -a "$(dirname "$0")/../config/" "${DM_HOME}/config/"
-        rsync -a "$(dirname "$0")/../systemd/" "${DM_HOME}/systemd/"
-        rsync -a "$(dirname "$0")/../scripts/" "${DM_HOME}/bin/"
-        rsync -a "$(dirname "$0")/../sql/" "${DM_HOME}/sql/" 2>/dev/null || true
+        rsync -a "${REPO_ROOT}/core/"    "${DM_HOME}/core/"    || err "rsync failed: core/"
+        rsync -a "${REPO_ROOT}/flux/"    "${DM_HOME}/flux/"    2>/dev/null || true
+        rsync -a "${REPO_ROOT}/config/"  "${DM_HOME}/config/"  || err "rsync failed: config/"
+        rsync -a "${REPO_ROOT}/systemd/" "${DM_HOME}/systemd/" || err "rsync failed: systemd/"
+        rsync -a "${REPO_ROOT}/scripts/" "${DM_HOME}/bin/"     || err "rsync failed: scripts/"
+        rsync -a "${REPO_ROOT}/sql/"     "${DM_HOME}/sql/"     2>/dev/null || true
         chown -R "${DM_USER}:${DM_GROUP}" "${DM_HOME}/core" "${DM_HOME}/config" \
             "${DM_HOME}/bin" "${DM_HOME}/systemd" 2>/dev/null || true
-        ok "Application source deployed"
+        ok "Application source deployed from ${REPO_ROOT}"
+    else
+        warn "Repo root not found at ${REPO_ROOT} — application source not deployed"
     fi
-
-    track4_packages
     init_dm_env
     install_ollama
     install_apparmor_profiles
